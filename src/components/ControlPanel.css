@@ -1,0 +1,152 @@
+.control-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 100, 100, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.control-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.control-button {
+    background: linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%);
+    color: #ffffff;
+    border: 2px solid rgba(184, 134, 11, 0.6);
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-family: 'Rajdhani', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    min-width: 150px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.control-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+    border-color: rgba(184, 134, 11, 0.9);
+    color: #f0f0f0;
+    background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+}
+
+.control-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control-button.add-front {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.control-button.add-back {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+}
+
+.control-button.randomize {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+}
+
+.control-button.remove-all {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.play-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.sing-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.sing-checkbox-label:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.sing-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.sing-label-text {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+}
+
+.control-button.elevated-melody {
+    background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+    border-color: rgba(184, 134, 11, 0.8);
+    color: #ffffff;
+    font-weight: 700;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.control-button.elevated-melody:hover:not(:disabled) {
+    background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
+    border-color: rgba(212, 160, 23, 0.9);
+    box-shadow: 0 6px 20px rgba(184, 134, 11, 0.4);
+}
+
+.control-button.elevated-melody:disabled {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+    border-color: rgba(100, 100, 100, 0.4);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-button.elevated-melody::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.control-button.elevated-melody:hover:not(:disabled)::before {
+    left: 100%;
+}

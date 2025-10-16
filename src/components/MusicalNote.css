@@ -1,0 +1,53 @@
+.musical-note {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    color: #ff6b6b;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.8), 0 0 20px rgba(255, 107, 107, 0.6);
+    pointer-events: none;
+    animation: floatUp 1.5s ease-out forwards;
+    z-index: 50;
+    font-weight: bold;
+}
+
+/* Counter-flip the musical note when singer is flipped */
+.singer-component.flipped .musical-note {
+    transform: scaleX(-1) translateX(50%);
+    animation: floatUpFlipped 1.5s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(0.7);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1.1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-80px) scale(0.8);
+    }
+}
+
+@keyframes floatUpFlipped {
+    0% {
+        opacity: 1;
+        transform: scaleX(-1) translateX(50%) translateY(0) scale(0.7);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleX(-1) translateX(50%) translateY(-30px) scale(1.1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scaleX(-1) translateX(50%) translateY(-80px) scale(0.8);
+    }
+}

@@ -1,0 +1,144 @@
+.singer-selector {
+    background: rgba(0, 0, 0, 0.9);
+    border-radius: 15px;
+    padding: 20px;
+    width: 250px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid rgba(100, 100, 100, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.selector-title {
+    color: #b8860b;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.2rem;
+    margin: 0 0 20px 0;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.position-section {
+    margin-bottom: 25px;
+}
+
+.position-title {
+    color: #a0a0a0;
+    font-family: 'Rajdhani', monospace;
+    font-size: 1.1rem;
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.singer-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.singer-button {
+    background: linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%);
+    border: 2px solid rgba(184, 134, 11, 0.6);
+    border-radius: 12px;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-height: 80px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.singer-button:hover {
+    background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+    border-color: rgba(184, 134, 11, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+.singer-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.singer-button.disabled,
+.singer-button:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.singer-button.disabled:hover,
+.singer-button:disabled:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: none;
+    box-shadow: none;
+}
+
+.singer-button.disabled .singer-head-button,
+.singer-button:disabled .singer-head-button {
+    opacity: 0.4;
+    transform: none;
+}
+
+.singer-button.disabled .singer-label,
+.singer-button:disabled .singer-label {
+    opacity: 0.4;
+}
+
+.singer-head-button {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.singer-button:hover .singer-head-button {
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.singer-label {
+    color: #ffffff;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.5px;
+}
+
+/* Scrollbar styling */
+.singer-selector::-webkit-scrollbar {
+    width: 6px;
+}
+
+.singer-selector::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
