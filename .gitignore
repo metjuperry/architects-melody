@@ -1,6 +1,8 @@
 node_modules
 Choir.html
 
+build
+
 # Assets with copyright restrictions
 *.png
 *.wav

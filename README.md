@@ -1,6 +1,6 @@
 # Twelfth Architect Workshop
 
-A React-based interactive choir application featuring clockwork singing statues.
+A React-based interactive choir application featuring clockwork singing statues from Silksong
 
 ## 🎭 Features
 
@@ -92,15 +92,7 @@ This project was created with Create React App and includes:
 - CSS bundling and optimization
 - Development and production builds
 
-## Contributing
-
-Feel free to enhance the application by:
-
-- Adding more singer variations
-- Implementing sound effects
-- Creating additional animations
-- Improving the stage design
-
 ## License
 
 This project is for educational and demonstration purposes.
+I don't own anything. All the assets belong to Team Cherry

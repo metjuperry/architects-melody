@@ -22,4 +22,4 @@ Write-Host "🌐 Deploying to GitHub Pages..." -ForegroundColor Yellow
 npm run deploy
 
 Write-Host "✅ Deployment complete!" -ForegroundColor Green
-Write-Host "🔗 Your app will be available at: https://yourusername.github.io/repository-name/" -ForegroundColor Cyan
+Write-Host "🔗 Your app will be available at: https://metjuperry.github.io/architects-melody" -ForegroundColor Cyan
