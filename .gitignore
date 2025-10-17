@@ -2,8 +2,7 @@ node_modules
 Choir.html
 
 # Assets with copyright restrictions
-*.png
-*.wav
+
 
 # Keep a placeholder file to maintain folder structure
 !public/assets/.gitkeep
