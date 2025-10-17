@@ -25,14 +25,14 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
             {/* Bridge corners - structural elements of the stage */}
             <div className="stage-corner top-left-corner">
                 <img
-                    src="/assets/Understore_extender_bridge_0004_1.png"
+                    src={`${process.env.PUBLIC_URL}/Understore_extender_bridge_0004_1.png`}
                     alt="Stage Corner"
                     className="corner-bridge"
                 />
             </div>
             <div className="stage-corner top-right-corner">
                 <img
-                    src="/assets/Understore_extender_bridge_0004_1.png"
+                    src={`${process.env.PUBLIC_URL}/Understore_extender_bridge_0004_1.png`}
                     alt="Stage Corner"
                     className="corner-bridge"
                 />
@@ -53,7 +53,7 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
                     {/* Pedestal for all singers */}
                     <div className="choir-pedestal">
                         <img
-                            src="/assets/Cog_Choir__0000_top_brace.png"
+                            src={`${process.env.PUBLIC_URL}/Cog_Choir__0000_top_brace.png`}
                             alt="Choir Pedestal"
                             className="pedestal-image"
                         />
