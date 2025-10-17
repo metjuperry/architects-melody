@@ -1,3 +1,7 @@
+.singer-component.disabled {
+    cursor: not-allowed !important;
+}
+
 .singer-component {
     position: relative;
     flex-shrink: 0;
@@ -8,18 +12,31 @@
     transform: scale(0.85);
 }
 
-/* Front row singers - positioned at the front */
+/* Front row singers - positioned at the front with significantly reduced hitbox */
 .singer-component[data-position="front"] {
     z-index: 10;
     position: relative;
+    margin: 0;
+    /* Further reduce width to create larger gaps */
 }
 
-/* Back row singers - elevated and slightly behind */
+
+/* Back row singers - elevated and slightly behind, fully clickable */
 .singer-component[data-position="back"] {
-    z-index: 5;
+    z-index: 5 !important;
+    /* Force lower z-index for proper layering */
     position: relative;
     opacity: 0.9;
-    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.4));
+    pointer-events: auto !important;
+    /* Force clickability */
+    cursor: pointer !important;
+    /* Ensure cursor shows as clickable */
+}
+
+/* Ensure back row singers become clickable on hover */
+.singer-component[data-position="back"]:hover {
+    z-index: 5 !important;
+    /* Higher than front row when hovering */
 }
 
 .singer-component.singer-tall-front,
@@ -373,12 +390,16 @@
     position: relative;
     width: 100%;
     height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through to parent */
 }
 
 /* Body image container - establishes positioning context */
 .image-body-container {
     position: relative;
     display: inline-block;
+    pointer-events: none;
+    /* Let clicks pass through to parent */
 }
 
 /* Body image */
@@ -387,6 +408,8 @@
     height: auto;
     width: 100%;
     object-fit: cover;
+    pointer-events: none;
+    /* Let clicks pass through to parent */
 }
 
 /* Head image - positioned absolutely within the body container */
@@ -396,6 +419,8 @@
     object-fit: cover;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+    /* Let clicks pass through to parent */
 }
 
 /* Specific head positions for different singer types */

@@ -10,6 +10,7 @@ interface SingerComponentProps {
     onSingerClick: (id: string) => void;
     onRemoveSinger: (id: string) => void;
     onFlipSinger: (id: string) => void;
+    isDisabled?: boolean;
 }
 
 const SingerComponent: React.FC<SingerComponentProps> = ({
@@ -18,7 +19,8 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
     totalInRow,
     onSingerClick,
     onRemoveSinger,
-    onFlipSinger
+    onFlipSinger,
+    isDisabled = false
 }) => {
     const [showNote, setShowNote] = useState(false);
 
@@ -50,17 +52,24 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
 
 
     const handleClick = () => {
-        onSingerClick(singer.id);
+        console.log(`🖱️ Singer clicked: ${singer.template.alt} (${singer.position}) - Disabled: ${isDisabled}`);
+        if (!isDisabled) {
+            onSingerClick(singer.id);
+        }
     };
 
     const handleRemove = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onRemoveSinger(singer.id);
+        if (!isDisabled) {
+            onRemoveSinger(singer.id);
+        }
     };
 
     const handleFlip = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onFlipSinger(singer.id);
+        if (!isDisabled) {
+            onFlipSinger(singer.id);
+        }
     };
 
 
@@ -70,31 +79,37 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
         'singer',
         singer.template.classes,
         singer.isFlipped ? 'flipped' : '',
-        singer.isSinging ? 'singing' : ''
+        singer.isSinging ? 'singing' : '',
+        isDisabled ? 'disabled' : ''
     ].filter(Boolean).join(' ');
 
     return (
         <div
             className={singerClasses}
             onClick={handleClick}
-            title={`Click to ${singer.isSinging ? 'stop' : 'start'} singing`}
+            title={isDisabled ? 'Disabled during elevated melody' : `Click to ${singer.isSinging ? 'stop' : 'start'} singing`}
             data-position={singer.position}
         >
-            <button
-                className="remove-singer"
-                onClick={handleRemove}
-                title="Remove singer"
-            >
-                ✕
-            </button>
+            {/* Only show control buttons when singer is not singing and not disabled */}
+            {!singer.isSinging && !isDisabled && (
+                <>
+                    <button
+                        className="remove-singer"
+                        onClick={handleRemove}
+                        title="Remove singer"
+                    >
+                        ✕
+                    </button>
 
-            <button
-                className="flip-singer"
-                onClick={handleFlip}
-                title="Flip singer"
-            >
-                ⟲
-            </button>
+                    <button
+                        className="flip-singer"
+                        onClick={handleFlip}
+                        title="Flip singer"
+                    >
+                        ⟲
+                    </button>
+                </>
+            )}
 
             <div className="singer-images">
                 <div className="image-body-container">

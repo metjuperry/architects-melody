@@ -26,7 +26,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <button
                     className="control-button randomize"
                     onClick={onRandomize}
-                    title="Create a random choir formation with 7 singers"
+                    disabled={isPlayingElevatedMelody}
+                    title={isPlayingElevatedMelody ? "Disabled during elevated melody" : "Create a random choir formation with 7 singers"}
                 >
                     Random Formation
                 </button>
@@ -34,8 +35,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 <button
                     className="control-button remove-all"
                     onClick={onRemoveAll}
-                    disabled={singerCount === 0}
-                    title="Dismantle all clockwork statues"
+                    disabled={singerCount === 0 || isPlayingElevatedMelody}
+                    title={isPlayingElevatedMelody ? "Disabled during elevated melody" : singerCount === 0 ? "No cogwork statues to remove" : "Dismantle all cogwork statues"}
                 >
                     Delete all
                 </button>
@@ -49,6 +50,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                             checked={isAllSinging}
                             onChange={onToggleAllSinging}
                             className="sing-checkbox"
+                            disabled={isPlayingElevatedMelody}
                         />
                         <span className="sing-label-text">
                             Hear the Architects Melody (loop)
@@ -58,10 +60,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     <button
                         className="control-button elevated-melody"
                         onClick={onPlayElevatedMelody}
-                        disabled={isPlayingElevatedMelody || singerCount < 7}
-                        title={singerCount < 7 ? `Need 7 clockwork singers to play elevated melody (currently ${singerCount}/7)` : "Play the complete elevated melody with all 7 clockwork singers"}
+                        disabled={isPlayingElevatedMelody || singerCount !== 7}
+                        title={singerCount !== 7 ? `Need 7 cogwork singers to play elevated melody (currently ${singerCount}/7)` : "Play the complete elevated melody with all 7 cogwork singers"}
                     >
-                        {isPlayingElevatedMelody ? 'Playing Elevated Melody...' : `Play Elevated Melody (${singerCount}/7 clockwork singers)`}
+                        {isPlayingElevatedMelody ? 'Playing Elevated Melody...' : `Play Elevated Melody (${singerCount}/7 cogwork singers)`}
                     </button>
                 </div>
             )}

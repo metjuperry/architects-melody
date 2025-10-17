@@ -8,13 +8,15 @@ interface ChoirFormationProps {
     onSingerClick: (id: string) => void;
     onRemoveSinger: (id: string) => void;
     onFlipSinger: (id: string) => void;
+    isDisabled?: boolean;
 }
 
 const ChoirFormation: React.FC<ChoirFormationProps> = ({
     singers,
     onSingerClick,
     onRemoveSinger,
-    onFlipSinger
+    onFlipSinger,
+    isDisabled = false
 }) => {
     // Split singers into front and back rows with maximum 4 per row
     const frontRowSingers = singers.filter(singer => singer.position === 'front').slice(0, 4);
@@ -44,7 +46,7 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
                     <div className="placeholder-content">
                         <div className="placeholder-title">The workshop stands silent...</div>
                         <div className="placeholder-subtitle">
-                            Select clockwork statues to hear the Architects Melody!
+                            Select cogwork statues to hear the Architects Melody!
                         </div>
                     </div>
                 </div>
@@ -68,9 +70,10 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
                                     singer={singer}
                                     index={index}
                                     totalInRow={backRowSingers.length}
-                                    onSingerClick={onSingerClick}
-                                    onRemoveSinger={onRemoveSinger}
-                                    onFlipSinger={onFlipSinger}
+                                    onSingerClick={isDisabled ? () => { } : onSingerClick}
+                                    onRemoveSinger={isDisabled ? () => { } : onRemoveSinger}
+                                    onFlipSinger={isDisabled ? () => { } : onFlipSinger}
+                                    isDisabled={isDisabled}
                                 />
                             ))}
                         </div>
@@ -85,9 +88,10 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
                                     singer={singer}
                                     index={index}
                                     totalInRow={frontRowSingers.length}
-                                    onSingerClick={onSingerClick}
-                                    onRemoveSinger={onRemoveSinger}
-                                    onFlipSinger={onFlipSinger}
+                                    onSingerClick={isDisabled ? () => { } : onSingerClick}
+                                    onRemoveSinger={isDisabled ? () => { } : onRemoveSinger}
+                                    onFlipSinger={isDisabled ? () => { } : onFlipSinger}
+                                    isDisabled={isDisabled}
                                 />
                             ))}
                         </div>

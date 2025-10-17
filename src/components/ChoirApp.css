@@ -10,8 +10,8 @@
     background: rgba(0, 0, 0, 0.7);
     padding: 30px;
     border-radius: 20px;
-    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border: 1px solid rgba(100, 100, 100, 0.3);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
@@ -91,4 +91,51 @@
     width: 120px;
     height: auto;
     display: block;
+}
+
+.team-cherry-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(184, 134, 11, 0.3);
+    padding: 10px 160px;
+    z-index: 999;
+    text-align: center;
+}
+
+.credit-text {
+    color: rgba(184, 134, 11, 0.9);
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    letter-spacing: 0.5px;
+}
+
+.silksong-link {
+    color: #d4a017;
+    text-decoration: underline;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.silksong-link:hover {
+    color: #f0c547;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(212, 160, 23, 0.6);
+    transform: translateY(-1px);
+}
+
+.silksong-link:visited {
+    color: #b8860b;
+}
+
+.silksong-link:visited:hover {
+    color: #d4a017;
 }

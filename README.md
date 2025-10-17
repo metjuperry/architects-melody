@@ -1,10 +1,10 @@
 # Twelfth Architect Workshop
 
-A React-based interactive choir application featuring clockwork singing statues from Silksong
+A React-based interactive choir application featuring cogwork singing statues from Silksong
 
 ## 🎭 Features
 
-- Interactive clockwork singer placement
+- Interactive cogwork singer placement
 - Multiple singer types and positions
 - Regular and elevated melody playback
 - URL-based configuration saving/loading

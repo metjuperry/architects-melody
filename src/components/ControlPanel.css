@@ -98,6 +98,12 @@
     transform: translateY(-1px);
 }
 
+.sing-checkbox-label:has(.sing-checkbox:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .sing-checkbox {
     width: 20px;
     height: 20px;

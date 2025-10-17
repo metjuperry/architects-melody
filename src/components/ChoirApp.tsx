@@ -81,6 +81,12 @@ const ChoirApp: React.FC = () => {
     const [isPlayingElevatedMelody, setIsPlayingElevatedMelody] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const elevatedMelodyRef = useRef<HTMLAudioElement | null>(null);
+    const singerAudioMap = useRef<Map<string, HTMLAudioElement>>(new Map());
+
+    // Web Audio API refs for individual singers
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const audioBufferRef = useRef<AudioBuffer | null>(null);
+    const singerSourceMap = useRef<Map<string, AudioBufferSourceNode>>(new Map());
 
     // Load configuration from URL on startup
     useEffect(() => {
@@ -128,6 +134,11 @@ const ChoirApp: React.FC = () => {
                 elevatedMelodyRef.current.pause();
                 elevatedMelodyRef.current = null;
             }
+            // Clean up all individual singer audio
+            singerAudioMap.current.forEach((audio) => {
+                audio.pause();
+            });
+            singerAudioMap.current.clear();
         };
     }, []);
 
@@ -147,19 +158,150 @@ const ChoirApp: React.FC = () => {
 
     const generateSingerId = () => Math.random().toString(36).substr(2, 9);
 
-    const addSinger = useCallback((position: 'front' | 'back') => {
-        const template = singerTemplates[Math.floor(Math.random() * singerTemplates.length)];
-        const isFlipped = Math.random() > 0.5;
+    // Initialize Web Audio API
+    const initWebAudio = useCallback(async () => {
+        if (!audioContextRef.current) {
+            audioContextRef.current = new AudioContext();
+        }
 
-        const newSinger: Singer = {
-            id: generateSingerId(),
-            template,
-            position,
-            isFlipped,
-            isSinging: false
-        };
+        if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+        }
 
-        setSingers(prev => [...prev, newSinger]);
+        // Load audio buffer if not already loaded
+        if (!audioBufferRef.current) {
+            try {
+                const response = await fetch(`${process.env.PUBLIC_URL}/assets/statueSingleMelody.wav`);
+                const arrayBuffer = await response.arrayBuffer();
+                audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
+                console.log('Individual singer audio buffer loaded successfully');
+            } catch (error) {
+                console.error('Error loading individual singer audio:', error);
+                throw error;
+            }
+        }
+    }, []);
+
+    // Create and start individual audio for a singer using Web Audio API
+    const createAndStartSingerAudio = useCallback(async (singer: Singer, positionInRow: number, totalInRow: number) => {
+        try {
+            await initWebAudio();
+
+            if (!audioContextRef.current || !audioBufferRef.current) {
+                throw new Error('Web Audio context or buffer not available');
+            }
+
+            // Calculate pitch in semitones - middle singer gets 0 (original pitch)
+            let pitchSemitones = 0;
+
+            // Base pitch adjustment by singer type (more noticeable differences)
+            const singerTypeAdjustment: Record<string, number> = {
+                'Short Front': 3,    // +3 semitones (much higher)
+                'Short Side': 2,     // +2 semitones (higher)
+                'Tall Front': -3,    // -3 semitones (much lower)
+                'Tall Side': -2      // -2 semitones (lower)
+            };
+
+            pitchSemitones += singerTypeAdjustment[singer.template.alt] || 0;
+
+            // Position within row variation - middle singer stays at base, others spread out
+            if (totalInRow > 1) {
+                const middlePosition = (totalInRow - 1) / 2;
+                const distanceFromMiddle = positionInRow - middlePosition;
+                // Each position away from middle adds ±1 semitone (doubled)
+                pitchSemitones += distanceFromMiddle * 1.0;
+            }
+
+            // Front vs back row variation (increased)
+            if (singer.position === 'front') {
+                pitchSemitones += 1; // Front row higher by 1 semitone
+            } else {
+                pitchSemitones -= 1; // Back row lower by 1 semitone
+            }
+
+            // Small random variation for uniqueness
+            const randomVariation = (Math.random() - 0.5) * 0.6; // ±0.3 semitones (doubled)
+            pitchSemitones += randomVariation;
+
+            // Create audio source
+            const source = audioContextRef.current.createBufferSource();
+            source.buffer = audioBufferRef.current;
+            source.loop = true;
+
+            // Apply pitch shift (convert semitones to frequency ratio)
+            const pitchRatio = Math.pow(2, pitchSemitones / 12);
+            source.playbackRate.setValueAtTime(pitchRatio, audioContextRef.current.currentTime);
+
+            // Create gain node for volume control
+            const gainNode = audioContextRef.current.createGain();
+            gainNode.gain.setValueAtTime(0.4, audioContextRef.current.currentTime); // Quieter for individual singers
+
+            // Connect: source -> gain -> destination
+            source.connect(gainNode);
+            gainNode.connect(audioContextRef.current.destination);
+
+            // Start playing immediately
+            source.start();
+
+            const currentTime = audioContextRef.current.currentTime;
+
+            // Schedule fade-out: Start fading at 0.7 seconds, complete fade by 1 second
+            const fadeStartTime = currentTime + 0.7; // Start fading after 700ms
+            const fadeEndTime = currentTime + 1.0;   // Complete fade at 1000ms
+
+            // Schedule the fade-out
+            gainNode.gain.setValueAtTime(0.4, currentTime); // Initial volume
+            gainNode.gain.setValueAtTime(0.4, fadeStartTime); // Hold volume until fade starts
+            gainNode.gain.linearRampToValueAtTime(0.0, fadeEndTime); // Fade to silence over 300ms
+
+            // Auto-stop after fade completes
+            setTimeout(() => {
+                try {
+                    source.stop();
+                    singerSourceMap.current.delete(singer.id);
+                } catch (e) {
+                    // Source might already be stopped
+                }
+            }, 1000);
+
+            console.log(`🎵 SINGER AUDIO STARTED (1 second with fade-out):
+  Type: ${singer.template.alt}
+  Position: ${positionInRow} of ${totalInRow} (${singer.position})
+  🎼 Pitch: ${pitchSemitones > 0 ? '+' : ''}${pitchSemitones.toFixed(2)} semitones
+  🔊 Ratio: ${pitchRatio.toFixed(3)}x
+  🎚️ Fade: 0.7s-1.0s (300ms fade-out)`);
+
+            // Store the source node for cleanup only
+            singerSourceMap.current.set(singer.id, source);
+
+            return true; // Success
+
+        } catch (error) {
+            console.error('Error creating singer audio:', error);
+            return false; // Failure
+        }
+    }, [initWebAudio]);
+
+    // Clean up audio for a singer (Web Audio API)
+    const cleanupSingerAudio = useCallback((singerId: string) => {
+        // Clean up Web Audio API source
+        const source = singerSourceMap.current.get(singerId);
+        if (source) {
+            try {
+                source.stop();
+            } catch (e) {
+                // Source might already be stopped
+            }
+            singerSourceMap.current.delete(singerId);
+        }
+
+        // Clean up old HTML5 audio if it exists (for backward compatibility)
+        const audio = singerAudioMap.current.get(singerId);
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+            singerAudioMap.current.delete(singerId);
+        }
     }, []);
 
     const addSpecificSinger = useCallback((template: SingerTemplate, position: 'front' | 'back') => {
@@ -177,13 +319,19 @@ const ChoirApp: React.FC = () => {
     }, []);
 
     const removeSinger = useCallback((id: string) => {
+        // Clean up audio before removing singer
+        cleanupSingerAudio(id);
         setSingers(prev => prev.filter(singer => singer.id !== id));
-    }, []);
+    }, [cleanupSingerAudio]);
 
     const removeAllSingers = useCallback(() => {
+        // Clean up all individual singer audio
+        singerAudioMap.current.forEach((audio, singerId) => {
+            cleanupSingerAudio(singerId);
+        });
         setSingers([]);
         setIsAllSinging(false);
-    }, []);
+    }, [cleanupSingerAudio]);
 
     const randomizeChoir = useCallback(() => {
         // Clear existing singers first
@@ -226,6 +374,15 @@ const ChoirApp: React.FC = () => {
     const toggleAllSinging = useCallback(() => {
         setIsAllSinging(prev => {
             const newState = !prev;
+
+            // Stop all individual singer audio when group singing starts
+            if (newState) {
+                singerAudioMap.current.forEach((audio) => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                });
+            }
+
             setSingers(singers => singers.map(singer => ({
                 ...singer,
                 isSinging: newState
@@ -244,6 +401,12 @@ const ChoirApp: React.FC = () => {
                 audioRef.current.currentTime = 0;
             }
             setIsAllSinging(false);
+
+            // Stop all individual singer audio
+            singerAudioMap.current.forEach((audio) => {
+                audio.pause();
+                audio.currentTime = 0;
+            });
 
             // Make all singers sing
             setSingers(singers => singers.map(singer => ({
@@ -271,13 +434,48 @@ const ChoirApp: React.FC = () => {
         }
     }, [singers.length]);
 
-    const toggleSingerSinging = useCallback((id: string) => {
-        setSingers(prev => prev.map(singer =>
-            singer.id === id
-                ? { ...singer, isSinging: !singer.isSinging }
-                : singer
-        ));
-    }, []);
+    const toggleSingerSinging = useCallback(async (id: string) => {
+        setSingers(prev => {
+            const updatedSingers = prev.map(singer => {
+                if (singer.id === id) {
+                    // Always clean up existing audio first
+                    cleanupSingerAudio(id);
+
+                    // Calculate position within row for pitch variation
+                    const singersInSameRow = prev.filter(s => s.position === singer.position);
+                    const positionInRow = singersInSameRow.findIndex(s => s.id === singer.id);
+                    const totalInRow = singersInSameRow.length;
+
+                    console.log(`🎵 Playing 1-second preview for ${singer.template.alt} (${singer.position}): position ${positionInRow} of ${totalInRow}`);
+
+                    // Start singing for 1 second (handled by createAndStartSingerAudio)
+                    createAndStartSingerAudio(singer, positionInRow, totalInRow).then(success => {
+                        if (success) {
+                            console.log(`🔊 Started 1-second preview for ${singer.template.alt}`);
+
+                            // Auto-stop the UI state after 1 second to match audio
+                            setTimeout(() => {
+                                setSingers(currentSingers =>
+                                    currentSingers.map(s =>
+                                        s.id === id ? { ...s, isSinging: false } : s
+                                    )
+                                );
+                                console.log(`🔇 Auto-stopped preview for ${singer.template.alt}`);
+                            }, 1000);
+                        } else {
+                            console.error(`❌ Failed to start preview for ${singer.template.alt}`);
+                        }
+                    }).catch(console.error);
+
+                    // Set singer as singing immediately (will be turned off after 1 second)
+                    return { ...singer, isSinging: true };
+                }
+                return singer;
+            });
+
+            return updatedSingers;
+        });
+    }, [createAndStartSingerAudio, cleanupSingerAudio]);
 
     const flipSinger = useCallback((id: string) => {
         setSingers(prev => prev.map(singer =>
@@ -303,6 +501,7 @@ const ChoirApp: React.FC = () => {
                     onSelectSinger={addSpecificSinger}
                     frontRowCount={frontRowCount}
                     backRowCount={backRowCount}
+                    isDisabled={isPlayingElevatedMelody}
                 />
 
                 <div className="choir-content">
@@ -321,6 +520,7 @@ const ChoirApp: React.FC = () => {
                         onSingerClick={toggleSingerSinging}
                         onRemoveSinger={removeSinger}
                         onFlipSinger={flipSinger}
+                        isDisabled={isPlayingElevatedMelody}
                     />
                 </div>
             </div>
@@ -351,6 +551,13 @@ const ChoirApp: React.FC = () => {
                     className="decoration-image"
                 />
             </div>
+
+            {/* Footer with Team Cherry credit */}
+            <footer className="team-cherry-footer">
+                <p className="credit-text">
+                    All assets belong to Team Cherry. This is a fan project for fun. Thanks to Team Cherry for the amazing game and art! <a href="https://store.steampowered.com/app/1030300/Hollow_Knight_Silksong/" target="_blank" rel="noopener noreferrer" className="silksong-link">Go buy Silksong!</a> ❤️
+                </p>
+            </footer>
         </div>
     );
 };
