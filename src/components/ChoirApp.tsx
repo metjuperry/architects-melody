@@ -8,26 +8,26 @@ import { Singer, SingerTemplate } from '../types/Singer';
 // Singer templates - using actual image assets
 const singerTemplates: SingerTemplate[] = [
     {
-        bodyImg: `${process.env.PUBLIC_URL}/Cog_Choir__0004_short_front.png`,
-        headImg: `${process.env.PUBLIC_URL}/Cog_Choir__0003_short_front_head.png`,
+        bodyImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0004_short_front.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0003_short_front_head.png`,
         classes: 'singer-short-front',
         alt: 'Short Front'
     },
     {
-        bodyImg: `${process.env.PUBLIC_URL}/Cog_Choir__0006_right_short.png`,
-        headImg: `${process.env.PUBLIC_URL}/Cog_Choir__0005_right_short_head.png`,
+        bodyImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0006_right_short.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0005_right_short_head.png`,
         classes: 'singer-short-side',
         alt: 'Short Side'
     },
     {
-        bodyImg: `${process.env.PUBLIC_URL}/Cog_Choir__0002_tall_front.png`,
-        headImg: `${process.env.PUBLIC_URL}/Cog_Choir__0001_tall_front_head.png`,
+        bodyImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0002_tall_front.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0001_tall_front_head.png`,
         classes: 'singer-tall-front',
         alt: 'Tall Front'
     },
     {
-        bodyImg: `${process.env.PUBLIC_URL}/Cog_Choir__0008_right_tall.png`,
-        headImg: `${process.env.PUBLIC_URL}/Cog_Choir__0007_right_tall_head.png`,
+        bodyImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0008_right_tall.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0007_right_tall_head.png`,
         classes: 'singer-tall-side',
         alt: 'Tall Side'
     }
@@ -111,11 +111,11 @@ const ChoirApp: React.FC = () => {
 
     // Initialize audio
     useEffect(() => {
-        audioRef.current = new Audio(`${process.env.PUBLIC_URL}/architect mel front row only loop.wav`);
+        audioRef.current = new Audio(`${process.env.PUBLIC_URL}/assets/architect mel front row only loop.wav`);
         audioRef.current.loop = true;
         audioRef.current.volume = 0.7;
 
-        elevatedMelodyRef.current = new Audio(`${process.env.PUBLIC_URL}/architect mel sequence all join in 2d.wav`);
+        elevatedMelodyRef.current = new Audio(`${process.env.PUBLIC_URL}/assets/architect mel sequence all join in 2d.wav`);
         elevatedMelodyRef.current.loop = false;
         elevatedMelodyRef.current.volume = 0.7;
 
@@ -328,7 +328,7 @@ const ChoirApp: React.FC = () => {
             {/* Architect's Table (behind architect) */}
             <div className="architect-table">
                 <img
-                    src={`${process.env.PUBLIC_URL}/architect_dressing_0008_1_table.png`}
+                    src={`${process.env.PUBLIC_URL}/assets/architect_dressing_0008_1_table.png`}
                     alt="Architect's Table"
                     className="table-image"
                 />
@@ -337,7 +337,7 @@ const ChoirApp: React.FC = () => {
             {/* Twelfth Architect Image */}
             <div className="architect-portrait">
                 <img
-                    src={`${process.env.PUBLIC_URL}/Twelfth_Architect.png`}
+                    src={`${process.env.PUBLIC_URL}/assets/Twelfth_Architect.png`}
                     alt="The Twelfth Architect"
                     className="architect-image"
                 />
@@ -346,7 +346,7 @@ const ChoirApp: React.FC = () => {
             {/* Lower left decoration */}
             <div className="lower-left-decoration">
                 <img
-                    src={`${process.env.PUBLIC_URL}/architect_dressing_0007_1.png`}
+                    src={`${process.env.PUBLIC_URL}/assets/architect_dressing_0007_1.png`}
                     alt="Workshop Decoration"
                     className="decoration-image"
                 />
