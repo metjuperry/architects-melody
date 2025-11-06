@@ -1,0 +1,90 @@
+.selection-indicator {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 60;
+    /* Above musical notes */
+    animation: flyInAndHover 0.6s ease-out forwards;
+}
+
+.selection-indicator-image {
+    width: 100px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(255, 215, 0, 0.6)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) brightness(1.1) contrast(1.05);
+    animation: gentleFloat 2s ease-in-out infinite;
+}
+
+/* Fly-in animation when selected */
+@keyframes flyInAndHover {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scale(0.3);
+    }
+
+    60% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(10px) scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+/* Gentle floating animation while hovering */
+@keyframes gentleFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+
+    25% {
+        transform: translateY(-4px) rotate(1deg);
+    }
+
+    50% {
+        transform: translateY(-2px) rotate(-1deg);
+    }
+
+    75% {
+        transform: translateY(-6px) rotate(2deg);
+    }
+}
+
+/* Fly-away animation when deselected */
+.selection-indicator.fly-away {
+    animation: flyAway 0.5s ease-in forwards;
+}
+
+@keyframes flyAway {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100px) scale(0.3) rotate(20deg);
+    }
+}
+
+/* Flipped version of fly-away */
+.singer-component.flipped .selection-indicator.fly-away {
+    animation: flyAwayFlipped 0.5s ease-in forwards;
+}
+
+@keyframes flyAwayFlipped {
+    0% {
+        opacity: 1;
+        transform: scaleX(-1) translateX(50%) translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scaleX(-1) translateX(50%) translateY(-100px) scale(0.3) rotate(-20deg);
+    }
+}

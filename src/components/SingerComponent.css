@@ -4,12 +4,44 @@
 
 .singer-component {
     position: relative;
-    flex-shrink: 0;
-    cursor: pointer;
+    grid-column: 1;
+    grid-row: 1;
+    cursor: grab;
     transition: all 0.3s ease;
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
-    z-index: 20;
-    transform: scale(0.85);
+    transform: scale(0.85) translate(var(--singer-x-offset, 0px), var(--singer-y-offset, 0px));
+    transform-origin: bottom center;
+}
+
+.singer-component.dragging {
+    cursor: grabbing;
+    transition: none;
+    /* Disable transitions during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Override any animations during drag */
+    animation: none !important;
+    transform: scale(0.85) translate(var(--singer-x-offset, 0px), var(--singer-y-offset, 0px)) !important;
+}
+
+.singer-component.dragging.flipped {
+    transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px)), var(--singer-y-offset, 0px)) !important;
+}
+
+/* Prevent text selection during drag operations */
+body.dragging {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Selection effect - show the head with subtle highlight */
+.singer-component.selected .image-head {
+    opacity: 1;
+    filter: brightness(1.1) contrast(1.05);
 }
 
 /* Front row singers - positioned at the front with significantly reduced hitbox */
@@ -52,7 +84,8 @@
 }
 
 .singer-component.flipped {
-    transform: scaleX(-1) scale(0.85);
+    transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px)), var(--singer-y-offset, 0px));
+    transform-origin: bottom center;
 }
 
 .singer-component.singing {
@@ -123,200 +156,200 @@
 
 @keyframes chaoticSing {
     0% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     12% {
-        transform: scale(0.85) translateX(2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     25% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     37% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     50% {
-        transform: scale(0.85) translateX(-2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     62% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     75% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     87% {
-        transform: scale(0.85) translateX(2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scale(0.85) translateX(0px);
+        transform: scale(0.85) translate(var(--singer-x-offset, 0px), var(--singer-y-offset, 0px));
     }
 }
 
 @keyframes chaoticSingFlipped {
     0% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     12% {
-        transform: scaleX(-1) scale(0.85) translateX(2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     25% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     37% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     50% {
-        transform: scaleX(-1) scale(0.85) translateX(-2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     62% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     75% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     87% {
-        transform: scaleX(-1) scale(0.85) translateX(2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scaleX(-1) scale(0.85) translateX(0px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px)), var(--singer-y-offset, 0px));
     }
 }
 
 /* Alternative chaotic animation 1 */
 @keyframes chaoticSingAlt1 {
     0% {
-        transform: scale(0.85) translateX(0px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 0px), var(--singer-y-offset, 0px));
     }
 
     15% {
-        transform: scale(0.85) translateX(-2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     30% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     45% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     60% {
-        transform: scale(0.85) translateX(2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     75% {
-        transform: scale(0.85) translateX(0px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     90% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(var(--singer-x-offset, 0px), var(--singer-y-offset, 0px));
     }
 }
 
 /* Alternative chaotic animation 2 */
 @keyframes chaoticSingAlt2 {
     0% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     20% {
-        transform: scale(0.85) translateX(-1px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     40% {
-        transform: scale(0.85) translateX(2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     60% {
-        transform: scale(0.85) translateX(0px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     80% {
-        transform: scale(0.85) translateX(-2px);
+        transform: scale(0.85) translate(calc(var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scale(0.85) translateX(1px);
+        transform: scale(0.85) translate(var(--singer-x-offset, 0px), var(--singer-y-offset, 0px));
     }
 }
 
 /* Flipped versions of alternative animations */
 @keyframes chaoticSingFlippedAlt1 {
     0% {
-        transform: scaleX(-1) scale(0.85) translateX(0px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 0px), var(--singer-y-offset, 0px));
     }
 
     15% {
-        transform: scaleX(-1) scale(0.85) translateX(-2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     30% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     45% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     60% {
-        transform: scaleX(-1) scale(0.85) translateX(2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     75% {
-        transform: scaleX(-1) scale(0.85) translateX(0px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     90% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px)), var(--singer-y-offset, 0px));
     }
 }
 
 @keyframes chaoticSingFlippedAlt2 {
     0% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     20% {
-        transform: scaleX(-1) scale(0.85) translateX(-1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -1px), var(--singer-y-offset, 0px));
     }
 
     40% {
-        transform: scaleX(-1) scale(0.85) translateX(2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 2px), var(--singer-y-offset, 0px));
     }
 
     60% {
-        transform: scaleX(-1) scale(0.85) translateX(0px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + -2px), var(--singer-y-offset, 0px));
     }
 
     80% {
-        transform: scaleX(-1) scale(0.85) translateX(-2px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px) + 1px), var(--singer-y-offset, 0px));
     }
 
     100% {
-        transform: scaleX(-1) scale(0.85) translateX(1px);
+        transform: scaleX(-1) scale(0.85) translate(calc(-1 * var(--singer-x-offset, 0px)), var(--singer-y-offset, 0px));
     }
 }
 
@@ -448,3 +481,31 @@
 .singer-component.singing .image-head {
     opacity: 1;
 }
+
+/* Destroyed singers - they don't sing */
+.singer-component.singer-destroyed-tall,
+.singer-component.singer-destroyed-short {
+    width: auto;
+    height: auto;
+    /* Slightly faded to show they're "destroyed" */
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3)) grayscale(0.2);
+}
+
+/* Both destroyed singers can be moved */
+.singer-component.singer-destroyed-tall,
+.singer-component.singer-destroyed-short {
+    cursor: grab;
+}
+
+.singer-component.singer-destroyed-tall.dragging,
+.singer-component.singer-destroyed-short.dragging {
+    cursor: grabbing;
+}
+
+/* Destroyed singers don't animate when "singing" */
+.singer-component.singer-destroyed-tall.singing,
+.singer-component.singer-destroyed-short.singing {
+    animation: none !important;
+}
+
+/* Note: Destroyed singers don't render head images at all in the component */

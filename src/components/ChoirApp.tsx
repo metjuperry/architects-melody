@@ -30,6 +30,20 @@ const singerTemplates: SingerTemplate[] = [
         headImg: `${process.env.PUBLIC_URL}/assets/Cog_Choir__0007_right_tall_head.png`,
         classes: 'singer-tall-side',
         alt: 'Tall Side'
+    },
+    {
+        bodyImg: `${process.env.PUBLIC_URL}/assets/CC_destroyed_0000_1.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/CC_destroyed_0000_1.png`,
+        classes: 'singer-destroyed-tall',
+        alt: 'Destroyed Tall',
+        canSing: false
+    },
+    {
+        bodyImg: `${process.env.PUBLIC_URL}/assets/CC_destroyed_0001_1.png`,
+        headImg: `${process.env.PUBLIC_URL}/assets/CC_destroyed_0001_1.png`,
+        classes: 'singer-destroyed-short',
+        alt: 'Destroyed Short',
+        canSing: false
     }
 ];
 
@@ -40,21 +54,96 @@ const encodeSingerConfig = (singers: Singer[]): string => {
     return singers.map(singer => {
         // Find template index
         const templateIndex = singerTemplates.findIndex(t => t.alt === singer.template.alt);
-        // Encode as: templateIndex-position-isFlipped
+
+        // Compact encoding: use base36 for numbers, single chars for flags
+        // Format: templateIndex + position(f/b) + flip(0/1) + base36(xPos+500) + base36(zIdx) + base36(yOff+500)
+        // Adding 500 to x/y offsets to handle negative numbers in base36
         const positionCode = singer.position === 'front' ? 'f' : 'b';
         const flipCode = singer.isFlipped ? '1' : '0';
-        return `${templateIndex}${positionCode}${flipCode}`;
-    }).join('-');
+        const xPos = ((singer.xPosition || 0) + 500).toString(36);
+        const zIdx = (singer.zIndex || 10).toString(36);
+        const yOff = ((singer.yOffset || 0) + 500).toString(36);
+
+        return `${templateIndex}${positionCode}${flipCode}${xPos}.${zIdx}.${yOff}`;
+    }).join(',');
 };
 
 const decodeSingerConfig = (config: string): Singer[] => {
     if (!config) return [];
 
-    const parts = config.split('-');
+    // Detect format: compact (contains '.'), old underscore (contains '_'), or legacy (contains '-')
+    const isCompactFormat = config.includes('.') && config.includes(',');
+    const isOldUnderscoreFormat = config.includes('_') && config.includes('|');
+
+    let parts: string[];
+    if (isCompactFormat) {
+        parts = config.split(',');
+    } else if (isOldUnderscoreFormat) {
+        parts = config.split('|');
+    } else {
+        parts = config.split('-');
+    }
+
     const singers: Singer[] = [];
 
     for (const part of parts) {
-        if (part.length === 3) {
+        if (isCompactFormat) {
+            // New compact format: templateIndex + position + flip + base36values
+            if (part.length >= 6) { // Minimum: t + p + f + x.z.y
+                const templateIndex = parseInt(part[0]);
+                const position = part[1] === 'f' ? 'front' : 'back';
+                const isFlipped = part[2] === '1';
+
+                const coords = part.substring(3).split('.');
+                if (coords.length === 3) {
+                    const xPosition = (parseInt(coords[0], 36) || 500) - 500;
+                    const zIndex = parseInt(coords[1], 36) || 10;
+                    const yOffset = (parseInt(coords[2], 36) || 500) - 500;
+
+                    if (templateIndex >= 0 && templateIndex < singerTemplates.length) {
+                        const template = singerTemplates[templateIndex];
+                        singers.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            template,
+                            position: position as 'front' | 'back',
+                            isFlipped,
+                            isSinging: false,
+                            xPosition,
+                            zIndex,
+                            yOffset,
+                            isSelected: false
+                        });
+                    }
+                }
+            }
+        } else if (isOldUnderscoreFormat) {
+            // Old underscore format: templateIndex_position_isFlipped_xPosition_zIndex_yOffset
+            const elements = part.split('_');
+            if (elements.length === 6) {
+                const templateIndex = parseInt(elements[0]);
+                const position = elements[1] === 'f' ? 'front' : 'back';
+                const isFlipped = elements[2] === '1';
+                const xPosition = parseInt(elements[3]) || 0;
+                const zIndex = parseInt(elements[4]) || 10;
+                const yOffset = parseInt(elements[5]) || 0;
+
+                if (templateIndex >= 0 && templateIndex < singerTemplates.length) {
+                    const template = singerTemplates[templateIndex];
+                    singers.push({
+                        id: Math.random().toString(36).substr(2, 9),
+                        template,
+                        position: position as 'front' | 'back',
+                        isFlipped,
+                        isSinging: false,
+                        xPosition,
+                        zIndex,
+                        yOffset,
+                        isSelected: false
+                    });
+                }
+            }
+        } else if (part.length === 3) {
+            // Legacy format: templateIndex+position+isFlipped (3 chars total)
             const templateIndex = parseInt(part[0]);
             const position = part[1] === 'f' ? 'front' : 'back';
             const isFlipped = part[2] === '1';
@@ -66,7 +155,11 @@ const decodeSingerConfig = (config: string): Singer[] => {
                     template,
                     position: position as 'front' | 'back',
                     isFlipped,
-                    isSinging: false
+                    isSinging: false,
+                    xPosition: 0,
+                    zIndex: 10,
+                    yOffset: 0,
+                    isSelected: false
                 });
             }
         }
@@ -84,8 +177,6 @@ const ChoirApp: React.FC = () => {
     const singerAudioMap = useRef<Map<string, HTMLAudioElement>>(new Map());
 
     // Web Audio API refs for individual singers
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const audioBufferRef = useRef<AudioBuffer | null>(null);
     const singerSourceMap = useRef<Map<string, AudioBufferSourceNode>>(new Map());
 
     // Load configuration from URL on startup
@@ -125,20 +216,25 @@ const ChoirApp: React.FC = () => {
         elevatedMelodyRef.current.loop = false;
         elevatedMelodyRef.current.volume = 0.7;
 
+        // Capture ref values for cleanup
+        const audioElement = audioRef.current;
+        const elevatedMelodyElement = elevatedMelodyRef.current;
+        const singerAudioMapCurrent = singerAudioMap.current;
+
         return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
+            if (audioElement) {
+                audioElement.pause();
                 audioRef.current = null;
             }
-            if (elevatedMelodyRef.current) {
-                elevatedMelodyRef.current.pause();
+            if (elevatedMelodyElement) {
+                elevatedMelodyElement.pause();
                 elevatedMelodyRef.current = null;
             }
             // Clean up all individual singer audio
-            singerAudioMap.current.forEach((audio) => {
+            singerAudioMapCurrent.forEach((audio) => {
                 audio.pause();
             });
-            singerAudioMap.current.clear();
+            singerAudioMapCurrent.clear();
         };
     }, []);
 
@@ -158,129 +254,9 @@ const ChoirApp: React.FC = () => {
 
     const generateSingerId = () => Math.random().toString(36).substr(2, 9);
 
-    // Initialize Web Audio API
-    const initWebAudio = useCallback(async () => {
-        if (!audioContextRef.current) {
-            audioContextRef.current = new AudioContext();
-        }
 
-        if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume();
-        }
 
-        // Load audio buffer if not already loaded
-        if (!audioBufferRef.current) {
-            try {
-                const response = await fetch(`${process.env.PUBLIC_URL}/assets/statueSingleMelody.wav`);
-                const arrayBuffer = await response.arrayBuffer();
-                audioBufferRef.current = await audioContextRef.current.decodeAudioData(arrayBuffer);
-                console.log('Individual singer audio buffer loaded successfully');
-            } catch (error) {
-                console.error('Error loading individual singer audio:', error);
-                throw error;
-            }
-        }
-    }, []);
 
-    // Create and start individual audio for a singer using Web Audio API
-    const createAndStartSingerAudio = useCallback(async (singer: Singer, positionInRow: number, totalInRow: number) => {
-        try {
-            await initWebAudio();
-
-            if (!audioContextRef.current || !audioBufferRef.current) {
-                throw new Error('Web Audio context or buffer not available');
-            }
-
-            // Calculate pitch in semitones - middle singer gets 0 (original pitch)
-            let pitchSemitones = 0;
-
-            // Base pitch adjustment by singer type (more noticeable differences)
-            const singerTypeAdjustment: Record<string, number> = {
-                'Short Front': 3,    // +3 semitones (much higher)
-                'Short Side': 2,     // +2 semitones (higher)
-                'Tall Front': -3,    // -3 semitones (much lower)
-                'Tall Side': -2      // -2 semitones (lower)
-            };
-
-            pitchSemitones += singerTypeAdjustment[singer.template.alt] || 0;
-
-            // Position within row variation - middle singer stays at base, others spread out
-            if (totalInRow > 1) {
-                const middlePosition = (totalInRow - 1) / 2;
-                const distanceFromMiddle = positionInRow - middlePosition;
-                // Each position away from middle adds ±1 semitone (doubled)
-                pitchSemitones += distanceFromMiddle * 1.0;
-            }
-
-            // Front vs back row variation (increased)
-            if (singer.position === 'front') {
-                pitchSemitones += 1; // Front row higher by 1 semitone
-            } else {
-                pitchSemitones -= 1; // Back row lower by 1 semitone
-            }
-
-            // Small random variation for uniqueness
-            const randomVariation = (Math.random() - 0.5) * 0.6; // ±0.3 semitones (doubled)
-            pitchSemitones += randomVariation;
-
-            // Create audio source
-            const source = audioContextRef.current.createBufferSource();
-            source.buffer = audioBufferRef.current;
-            source.loop = true;
-
-            // Apply pitch shift (convert semitones to frequency ratio)
-            const pitchRatio = Math.pow(2, pitchSemitones / 12);
-            source.playbackRate.setValueAtTime(pitchRatio, audioContextRef.current.currentTime);
-
-            // Create gain node for volume control
-            const gainNode = audioContextRef.current.createGain();
-            gainNode.gain.setValueAtTime(0.4, audioContextRef.current.currentTime); // Quieter for individual singers
-
-            // Connect: source -> gain -> destination
-            source.connect(gainNode);
-            gainNode.connect(audioContextRef.current.destination);
-
-            // Start playing immediately
-            source.start();
-
-            const currentTime = audioContextRef.current.currentTime;
-
-            // Schedule fade-out: Start fading at 0.7 seconds, complete fade by 1 second
-            const fadeStartTime = currentTime + 0.7; // Start fading after 700ms
-            const fadeEndTime = currentTime + 1.0;   // Complete fade at 1000ms
-
-            // Schedule the fade-out
-            gainNode.gain.setValueAtTime(0.4, currentTime); // Initial volume
-            gainNode.gain.setValueAtTime(0.4, fadeStartTime); // Hold volume until fade starts
-            gainNode.gain.linearRampToValueAtTime(0.0, fadeEndTime); // Fade to silence over 300ms
-
-            // Auto-stop after fade completes
-            setTimeout(() => {
-                try {
-                    source.stop();
-                    singerSourceMap.current.delete(singer.id);
-                } catch (e) {
-                    // Source might already be stopped
-                }
-            }, 1000);
-
-            console.log(`🎵 SINGER AUDIO STARTED (1 second with fade-out):
-  Type: ${singer.template.alt}
-  Position: ${positionInRow} of ${totalInRow} (${singer.position})
-  🎼 Pitch: ${pitchSemitones > 0 ? '+' : ''}${pitchSemitones.toFixed(2)} semitones
-  🔊 Ratio: ${pitchRatio.toFixed(3)}x
-  🎚️ Fade: 0.7s-1.0s (300ms fade-out)`);
-
-            // Store the source node for cleanup only
-            singerSourceMap.current.set(singer.id, source);
-
-            return true; // Success
-
-        } catch (error) {
-            console.error('Error creating singer audio:', error);
-            return false; // Failure
-        }
-    }, [initWebAudio]);
 
     // Clean up audio for a singer (Web Audio API)
     const cleanupSingerAudio = useCallback((singerId: string) => {
@@ -312,7 +288,11 @@ const ChoirApp: React.FC = () => {
             template,
             position,
             isFlipped,
-            isSinging: false
+            isSinging: false,
+            xPosition: 0, // Start at center
+            zIndex: 10, // Default z-index, can be adjusted with move forward/back
+            yOffset: 0, // Default y-offset, will be adjusted for depth
+            isSelected: false
         };
 
         setSingers(prev => [...prev, newSinger]);
@@ -333,43 +313,7 @@ const ChoirApp: React.FC = () => {
         setIsAllSinging(false);
     }, [cleanupSingerAudio]);
 
-    const randomizeChoir = useCallback(() => {
-        // Clear existing singers first
-        setSingers([]);
-        setIsAllSinging(false);
 
-        // Randomly decide formation: either 3 back + 4 front, or 4 back + 3 front
-        const frontCount = Math.random() > 0.5 ? 4 : 3;
-        const backCount = frontCount === 4 ? 3 : 4;
-
-        const newSingers: Singer[] = [];
-
-        // Add back row singers
-        for (let i = 0; i < backCount; i++) {
-            const template = singerTemplates[Math.floor(Math.random() * singerTemplates.length)];
-            newSingers.push({
-                id: generateSingerId(),
-                template,
-                position: 'back',
-                isFlipped: Math.random() > 0.5,
-                isSinging: false
-            });
-        }
-
-        // Add front row singers
-        for (let i = 0; i < frontCount; i++) {
-            const template = singerTemplates[Math.floor(Math.random() * singerTemplates.length)];
-            newSingers.push({
-                id: generateSingerId(),
-                template,
-                position: 'front',
-                isFlipped: Math.random() > 0.5,
-                isSinging: false
-            });
-        }
-
-        setSingers(newSingers);
-    }, []);
 
     const toggleAllSinging = useCallback(() => {
         setIsAllSinging(prev => {
@@ -385,14 +329,14 @@ const ChoirApp: React.FC = () => {
 
             setSingers(singers => singers.map(singer => ({
                 ...singer,
-                isSinging: newState
+                isSinging: newState && singer.template.canSing !== false
             })));
             return newState;
         });
     }, []);
 
     const playElevatedMelody = useCallback(() => {
-        if (elevatedMelodyRef.current && singers.length === 7) {
+        if (elevatedMelodyRef.current) {
             setIsPlayingElevatedMelody(true);
 
             // Stop the regular melody if it's playing
@@ -408,10 +352,10 @@ const ChoirApp: React.FC = () => {
                 audio.currentTime = 0;
             });
 
-            // Make all singers sing
+            // Make all singers sing (only those who can sing)
             setSingers(singers => singers.map(singer => ({
                 ...singer,
-                isSinging: true
+                isSinging: singer.template.canSing !== false
             })));
 
             // Play the elevated melody
@@ -432,50 +376,9 @@ const ChoirApp: React.FC = () => {
 
             elevatedMelodyRef.current.addEventListener('ended', handleEnded);
         }
-    }, [singers.length]);
+    }, []);
 
-    const toggleSingerSinging = useCallback(async (id: string) => {
-        setSingers(prev => {
-            const updatedSingers = prev.map(singer => {
-                if (singer.id === id) {
-                    // Always clean up existing audio first
-                    cleanupSingerAudio(id);
 
-                    // Calculate position within row for pitch variation
-                    const singersInSameRow = prev.filter(s => s.position === singer.position);
-                    const positionInRow = singersInSameRow.findIndex(s => s.id === singer.id);
-                    const totalInRow = singersInSameRow.length;
-
-                    console.log(`🎵 Playing 1-second preview for ${singer.template.alt} (${singer.position}): position ${positionInRow} of ${totalInRow}`);
-
-                    // Start singing for 1 second (handled by createAndStartSingerAudio)
-                    createAndStartSingerAudio(singer, positionInRow, totalInRow).then(success => {
-                        if (success) {
-                            console.log(`🔊 Started 1-second preview for ${singer.template.alt}`);
-
-                            // Auto-stop the UI state after 1 second to match audio
-                            setTimeout(() => {
-                                setSingers(currentSingers =>
-                                    currentSingers.map(s =>
-                                        s.id === id ? { ...s, isSinging: false } : s
-                                    )
-                                );
-                                console.log(`🔇 Auto-stopped preview for ${singer.template.alt}`);
-                            }, 1000);
-                        } else {
-                            console.error(`❌ Failed to start preview for ${singer.template.alt}`);
-                        }
-                    }).catch(console.error);
-
-                    // Set singer as singing immediately (will be turned off after 1 second)
-                    return { ...singer, isSinging: true };
-                }
-                return singer;
-            });
-
-            return updatedSingers;
-        });
-    }, [createAndStartSingerAudio, cleanupSingerAudio]);
 
     const flipSinger = useCallback((id: string) => {
         setSingers(prev => prev.map(singer =>
@@ -485,13 +388,89 @@ const ChoirApp: React.FC = () => {
         ));
     }, []);
 
-    const frontRowCount = singers.filter(singer => singer.position === 'front').length;
-    const backRowCount = singers.filter(singer => singer.position === 'back').length;
+    const updateSingerPosition = useCallback((id: string, xPosition: number) => {
+        console.log(`🎯 ChoirApp: Updating singer ${id} position to ${xPosition}px`);
+        setSingers(prev => {
+            const updated = prev.map(singer =>
+                singer.id === id
+                    ? { ...singer, xPosition }
+                    : singer
+            );
+            console.log(`📊 ChoirApp: Updated singers state`, updated.find(s => s.id === id));
+            return updated;
+        });
+    }, []);
+
+    const selectSinger = useCallback((id: string) => {
+        console.log(`🎯 ChoirApp: Selecting singer ${id}`);
+        setSingers(prev => prev.map(singer => ({
+            ...singer,
+            isSelected: singer.id === id
+        })));
+    }, []);
+
+    const clearSelection = useCallback(() => {
+        console.log(`🎯 ChoirApp: Clearing selection`);
+        setSingers(prev => prev.map(singer => ({
+            ...singer,
+            isSelected: false
+        })));
+    }, []);
+
+    const moveForward = useCallback((id: string) => {
+        console.log(`🎯 ChoirApp: Moving singer ${id} forward (Z-axis)`);
+        setSingers(prev => prev.map(singer =>
+            singer.id === id
+                ? {
+                    ...singer,
+                    zIndex: (singer.zIndex || 10) + 1
+                }
+                : singer
+        ));
+    }, []);
+
+    const moveBack = useCallback((id: string) => {
+        console.log(`🎯 ChoirApp: Moving singer ${id} back (Z-axis)`);
+        setSingers(prev => prev.map(singer =>
+            singer.id === id
+                ? {
+                    ...singer,
+                    zIndex: Math.max((singer.zIndex || 10) - 1, 1) // Don't go below 1
+                }
+                : singer
+        ));
+    }, []);
+
+    const moveUp = useCallback((id: string) => {
+        console.log(`🎯 ChoirApp: Moving singer ${id} up (Y-axis)`);
+        setSingers(prev => prev.map(singer =>
+            singer.id === id
+                ? {
+                    ...singer,
+                    yOffset: (singer.yOffset || 0) - 10 // Move up (negative Y)
+                }
+                : singer
+        ));
+    }, []);
+
+    const moveDown = useCallback((id: string) => {
+        console.log(`🎯 ChoirApp: Moving singer ${id} down (Y-axis)`);
+        setSingers(prev => prev.map(singer =>
+            singer.id === id
+                ? {
+                    ...singer,
+                    yOffset: (singer.yOffset || 0) + 10 // Move down (positive Y)
+                }
+                : singer
+        ));
+    }, []);
+
+    const singerCount = singers.length;
 
     return (
-        <div className="choir-app">
+        <div className="choir-app" >
             <header className="choir-header">
-                <h1 className="choir-title">Architects Melody configurator</h1>
+                <h1 className="choir-title">Architects Melody Configurator</h1>
                 <p className="choir-subtitle">Configure the statues and listen to the gift of the Architects</p>
             </header>
 
@@ -499,15 +478,22 @@ const ChoirApp: React.FC = () => {
                 <SingerSelector
                     singerTemplates={singerTemplates}
                     onSelectSinger={addSpecificSinger}
-                    frontRowCount={frontRowCount}
-                    backRowCount={backRowCount}
+                    singerCount={singerCount}
                     isDisabled={isPlayingElevatedMelody}
+                    selectedSinger={singers.find(s => s.isSelected) || null}
+                    onRemoveSinger={removeSinger}
+                    onFlipSinger={flipSinger}
+                    onClearSelection={clearSelection}
+                    onMoveForward={moveForward}
+                    onMoveBack={moveBack}
+                    onMoveUp={moveUp}
+                    onMoveDown={moveDown}
+                    onRemoveAll={removeAllSingers}
                 />
 
                 <div className="choir-content">
                     <ControlPanel
-                        onRandomize={randomizeChoir}
-                        onRemoveAll={removeAllSingers}
+
                         onToggleAllSinging={toggleAllSinging}
                         onPlayElevatedMelody={playElevatedMelody}
                         isAllSinging={isAllSinging}
@@ -517,9 +503,8 @@ const ChoirApp: React.FC = () => {
 
                     <ChoirFormation
                         singers={singers}
-                        onSingerClick={toggleSingerSinging}
-                        onRemoveSinger={removeSinger}
-                        onFlipSinger={flipSinger}
+                        onSingerSelect={selectSinger}
+                        onUpdatePosition={updateSingerPosition}
                         isDisabled={isPlayingElevatedMelody}
                     />
                 </div>

@@ -5,22 +5,19 @@ import { Singer } from '../types/Singer';
 
 interface ChoirFormationProps {
     singers: Singer[];
-    onSingerClick: (id: string) => void;
-    onRemoveSinger: (id: string) => void;
-    onFlipSinger: (id: string) => void;
+    onSingerSelect: (id: string) => void;
+    onUpdatePosition: (id: string, xPosition: number) => void;
     isDisabled?: boolean;
 }
 
 const ChoirFormation: React.FC<ChoirFormationProps> = ({
     singers,
-    onSingerClick,
-    onRemoveSinger,
-    onFlipSinger,
+    onSingerSelect,
+    onUpdatePosition,
     isDisabled = false
 }) => {
-    // Split singers into front and back rows with maximum 4 per row
-    const frontRowSingers = singers.filter(singer => singer.position === 'front').slice(0, 4);
-    const backRowSingers = singers.filter(singer => singer.position === 'back').slice(0, 4);
+    // All singers are now in a single formation with depth controlled by zIndex and yOffset
+    const allSingers = singers.slice(0, 8); // Maximum 8 singers total
 
     return (
         <div className="choir-formation-container">
@@ -61,36 +58,17 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
                         />
                     </div>
 
-                    {/* Back row singers - positioned behind */}
-                    {backRowSingers.length > 0 && (
-                        <div className="back-row">
-                            {backRowSingers.map((singer, index) => (
+                    {/* Single formation with all singers using z-index for depth */}
+                    {allSingers.length > 0 && (
+                        <div className="single-formation">
+                            {allSingers.map((singer, index) => (
                                 <SingerComponent
                                     key={singer.id}
                                     singer={singer}
                                     index={index}
-                                    totalInRow={backRowSingers.length}
-                                    onSingerClick={isDisabled ? () => { } : onSingerClick}
-                                    onRemoveSinger={isDisabled ? () => { } : onRemoveSinger}
-                                    onFlipSinger={isDisabled ? () => { } : onFlipSinger}
-                                    isDisabled={isDisabled}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Front row singers - positioned in front */}
-                    {frontRowSingers.length > 0 && (
-                        <div className="front-row">
-                            {frontRowSingers.map((singer, index) => (
-                                <SingerComponent
-                                    key={singer.id}
-                                    singer={singer}
-                                    index={index}
-                                    totalInRow={frontRowSingers.length}
-                                    onSingerClick={isDisabled ? () => { } : onSingerClick}
-                                    onRemoveSinger={isDisabled ? () => { } : onRemoveSinger}
-                                    onFlipSinger={isDisabled ? () => { } : onFlipSinger}
+                                    totalInRow={allSingers.length}
+                                    onSingerSelect={isDisabled ? () => { } : onSingerSelect}
+                                    onUpdatePosition={isDisabled ? () => { } : onUpdatePosition}
                                     isDisabled={isDisabled}
                                 />
                             ))}

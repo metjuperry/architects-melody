@@ -2,9 +2,9 @@
     background: rgba(0, 0, 0, 0.9);
     border-radius: 15px;
     padding: 20px;
-    width: 250px;
+    width: 300px;
     max-height: 80vh;
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
     border: 1px solid rgba(100, 100, 100, 0.4);
     backdrop-filter: blur(10px);
@@ -141,4 +141,130 @@
 
 .singer-selector::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.5);
+}
+
+/* Singer Controls Section */
+.singer-controls {
+    margin-top: 25px;
+    border-top: 2px solid rgba(184, 134, 11, 0.3);
+    padding-top: 20px;
+}
+
+.selected-singer-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.selected-singer-head {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #b8860b;
+    box-shadow: 0 2px 8px rgba(184, 134, 11, 0.3);
+    object-fit: cover;
+    background: rgba(184, 134, 11, 0.1);
+}
+
+.singer-name {
+    color: #b8860b;
+    font-family: 'Rajdhani', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    display: block;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.singer-control-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+
+/* Override singer-button styles for control buttons */
+.singer-control-buttons .singer-button {
+    min-height: 40px;
+    padding: 8px 12px;
+    flex-direction: row;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.flip-singer {
+    border-color: rgba(34, 139, 34, 0.6) !important;
+}
+
+.flip-singer:hover:not(:disabled) {
+    border-color: rgba(34, 139, 34, 0.9) !important;
+    background: linear-gradient(135deg, rgba(34, 139, 34, 0.15) 0%, rgba(34, 139, 34, 0.05) 100%) !important;
+}
+
+.remove-singer {
+    border-color: rgba(220, 20, 60, 0.6) !important;
+}
+
+.remove-singer:hover:not(:disabled) {
+    border-color: rgba(220, 20, 60, 0.9) !important;
+    background: linear-gradient(135deg, rgba(220, 20, 60, 0.15) 0%, rgba(220, 20, 60, 0.05) 100%) !important;
+}
+
+.clear-selection {
+    border-color: rgba(128, 128, 128, 0.6) !important;
+}
+
+.clear-selection:hover:not(:disabled) {
+    border-color: rgba(128, 128, 128, 0.9) !important;
+    background: linear-gradient(135deg, rgba(128, 128, 128, 0.15) 0%, rgba(128, 128, 128, 0.05) 100%) !important;
+}
+
+.no-singer-selected {
+    color: #666;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.95rem;
+    text-align: center;
+    font-style: italic;
+    padding: 15px 10px;
+}
+
+/* Button grouping styles */
+.button-group {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(100, 100, 100, 0.2);
+}
+
+.button-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.button-group-title {
+    color: #b8860b;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    margin: 0 0 8px 0;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.button-group .singer-buttons,
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.button-group .singer-button {
+    flex: 1;
+    min-width: 70px;
+    font-size: 0.8rem;
 }

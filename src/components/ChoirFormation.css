@@ -64,6 +64,8 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    pointer-events: none;
+    /* Allow mouse events to pass through to singers below */
 }
 
 .pedestal-image {
@@ -76,27 +78,16 @@
 
 }
 
-.front-row {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
+.single-formation {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
-    gap: 20px;
-}
-
-.back-row {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 5;
-    gap: 12px;
+    justify-items: center;
+    align-items: end;
 }
 
 .stage-backdrop {
