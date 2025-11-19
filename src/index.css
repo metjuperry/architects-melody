@@ -8,6 +8,8 @@ body {
     background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 25%, #3a3a3a 50%, #1e1e1e 100%);
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: hidden;
+    /* Prevent vertical scrolling */
 }
 
 code {
@@ -21,6 +23,8 @@ code {
 
 html {
     overflow-x: hidden;
+    overflow-y: hidden;
+    /* Prevent vertical scrolling */
     height: 100%;
 }
 

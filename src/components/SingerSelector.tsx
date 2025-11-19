@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './SingerSelector.css';
 import { SingerTemplate, Singer } from '../types/Singer';
 
@@ -13,8 +13,6 @@ interface SingerSelectorProps {
     onClearSelection: () => void;
     onMoveForward: (id: string) => void;
     onMoveBack: (id: string) => void;
-    onMoveUp: (id: string) => void;
-    onMoveDown: (id: string) => void;
     onRemoveAll: () => void;
 }
 
@@ -29,39 +27,96 @@ const SingerSelector: React.FC<SingerSelectorProps> = ({
     onClearSelection,
     onMoveForward,
     onMoveBack,
-    onMoveUp,
-    onMoveDown,
     onRemoveAll
 }) => {
-    const MAX_SINGERS = 8;
-    const isFormationFull = singerCount >= MAX_SINGERS;
+    // Remove the MAX_SINGERS limit - allow unlimited singers
+    const isFormationFull = false;
+
+    // State for collapsible "Add Singer" section
+    const [isAddSectionCollapsed, setIsAddSectionCollapsed] = useState(false);
+
+    // Auto-collapse "Add Singer" section when a singer is selected
+    useEffect(() => {
+        if (selectedSinger) {
+            setIsAddSectionCollapsed(true);
+        }
+    }, [selectedSinger]);
 
     return (
         <div className="singer-selector">
             <h3 className="selector-title">Cogwork Assembly</h3>
 
             <div className="position-section">
-                <h4 className="position-title">Add Singer ({singerCount}/{MAX_SINGERS})</h4>
-                <div className="singer-buttons">
-                    {singerTemplates.map((template, index) => {
-                        const isSelectorDisabled = isDisabled || isFormationFull;
-                        return (
-                            <button
-                                key={`singer-${index}`}
-                                className={`singer-button ${isSelectorDisabled ? 'disabled' : ''}`}
-                                onClick={() => !isSelectorDisabled && onSelectSinger(template, 'front')}
-                                disabled={isSelectorDisabled}
-                                title={isDisabled ? 'Disabled during elevated melody' : isFormationFull ? 'Assembly is complete (8/8)' : `Install ${template.alt} statue`}
-                            >
-                                <img
-                                    src={template.headImg}
-                                    alt={template.alt}
-                                    className="singer-head-button"
-                                />
-                                <span className="singer-label">{template.alt}</span>
-                            </button>
-                        );
-                    })}
+                <div className="position-header">
+                    <h4 className="position-title">Add Singer ({singerCount})</h4>
+                    <button
+                        className="collapse-toggle"
+                        onClick={() => setIsAddSectionCollapsed(!isAddSectionCollapsed)}
+                        title={isAddSectionCollapsed ? "Expand add singer section" : "Collapse add singer section"}
+                    >
+                        <span className="collapse-text">
+                            {isAddSectionCollapsed ? 'Expand' : 'Collapse'}
+                        </span>
+                    </button>
+                </div>
+                <div className={`collapsible-content ${isAddSectionCollapsed ? 'collapsed' : 'expanded'}`}>
+                    <div className="singer-buttons-grid">
+                        {/* Tall Singer Row */}
+                        <div className="singer-row tall-row">
+                            <h5 className="row-label">Tall Cogwork</h5>
+                            <div className="singer-row-buttons">
+                                {singerTemplates
+                                    .filter(template => template.alt.toLowerCase().includes('tall'))
+                                    .map((template, index) => {
+                                        const isSelectorDisabled = isDisabled || isFormationFull;
+                                        return (
+                                            <button
+                                                key={`tall-singer-${index}`}
+                                                className={`singer-button ${isSelectorDisabled ? 'disabled' : ''}`}
+                                                onClick={() => !isSelectorDisabled && onSelectSinger(template, 'front')}
+                                                disabled={isSelectorDisabled}
+                                                title={isDisabled ? 'Disabled during elevated melody' : `Install ${template.alt} statue`}
+                                            >
+                                                <img
+                                                    src={template.headImg}
+                                                    alt={template.alt}
+                                                    className="singer-head-button"
+                                                />
+                                                <span className="singer-label">{template.alt}</span>
+                                            </button>
+                                        );
+                                    })}
+                            </div>
+                        </div>
+
+                        {/* Short Singer Row */}
+                        <div className="singer-row short-row">
+                            <h5 className="row-label">Short Cogwork</h5>
+                            <div className="singer-row-buttons">
+                                {singerTemplates
+                                    .filter(template => template.alt.toLowerCase().includes('short'))
+                                    .map((template, index) => {
+                                        const isSelectorDisabled = isDisabled || isFormationFull;
+                                        return (
+                                            <button
+                                                key={`short-singer-${index}`}
+                                                className={`singer-button ${isSelectorDisabled ? 'disabled' : ''}`}
+                                                onClick={() => !isSelectorDisabled && onSelectSinger(template, 'front')}
+                                                disabled={isSelectorDisabled}
+                                                title={isDisabled ? 'Disabled during elevated melody' : `Install ${template.alt} statue`}
+                                            >
+                                                <img
+                                                    src={template.headImg}
+                                                    alt={template.alt}
+                                                    className="singer-head-button"
+                                                />
+                                                <span className="singer-label">{template.alt}</span>
+                                            </button>
+                                        );
+                                    })}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -86,16 +141,22 @@ const SingerSelector: React.FC<SingerSelectorProps> = ({
                             alt={selectedSinger.template.alt}
                             className="selected-singer-head"
                         />
-                        {/* <div className="singer-name">
-                            {selectedSinger.template.alt}
-                            {selectedSinger.isFlipped && ' (Flipped)'}
-                            {selectedSinger.position === 'back' && ' (Back Row)'}
-                        </div> */}
-                        <div className="singer-control-buttons">
+                        <div className="movement-instruction">
+                            Drag with your mouse or use the arrow keys to position the selected statue
+                        </div>
+                        <div className="button-controls">
+                            {/* Labels Row */}
+                            <div className="button-labels-row">
+                                <div className="depth-label-section">
+                                    <h5 className="button-group-title depth-title">Depth</h5>
+                                </div>
+                                <div className="actions-label-section">
+                                    <h5 className="button-group-title actions-title">Actions</h5>
+                                </div>
+                            </div>
 
-                            {/* Depth Controls (Z-axis) */}
-                            <div className="button-group">
-                                <h5 className="button-group-title">Depth</h5>
+                            {/* Buttons Row */}
+                            <div className="main-buttons-row">
                                 <button
                                     className="singer-button"
                                     onClick={() => onMoveForward(selectedSinger.id)}
@@ -112,32 +173,6 @@ const SingerSelector: React.FC<SingerSelectorProps> = ({
                                 >
                                     <span className="singer-label">Back</span>
                                 </button>
-                            </div>
-
-                            {/* Height Controls (Y-axis) */}
-                            <div className="button-group">
-                                <h5 className="button-group-title">Height</h5>
-                                <button
-                                    className="singer-button"
-                                    onClick={() => onMoveUp(selectedSinger.id)}
-                                    disabled={isDisabled}
-                                    title={isDisabled ? "Disabled during elevated melody" : `Move ${selectedSinger.template.alt} up (negative y-offset)`}
-                                >
-                                    <span className="singer-label">Up</span>
-                                </button>
-                                <button
-                                    className="singer-button"
-                                    onClick={() => onMoveDown(selectedSinger.id)}
-                                    disabled={isDisabled}
-                                    title={isDisabled ? "Disabled during elevated melody" : `Move ${selectedSinger.template.alt} down (positive y-offset)`}
-                                >
-                                    <span className="singer-label">Down</span>
-                                </button>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="button-group">
-                                <h5 className="button-group-title">Actions</h5>
                                 <button
                                     className="singer-button"
                                     onClick={() => onFlipSinger(selectedSinger.id)}
@@ -146,29 +181,25 @@ const SingerSelector: React.FC<SingerSelectorProps> = ({
                                 >
                                     <span className="singer-label">Flip</span>
                                 </button>
-                                <button
-                                    className="singer-button"
-                                    onClick={onClearSelection}
-                                    disabled={isDisabled}
-                                    title={isDisabled ? "Disabled during elevated melody" : "Clear selection"}
-                                >
-                                    <span className="singer-label">Unselect</span>
-                                </button>
                             </div>
 
+                            {/* Remove Button Row */}
+                            <div className="remove-button-row">
+                                <button
+                                    className="control-button remove-button-wide remove-all"
+                                    onClick={() => onRemoveSinger(selectedSinger.id)}
+                                    disabled={isDisabled}
+                                    title={isDisabled ? "Disabled during elevated melody" : `Remove ${selectedSinger.template.alt}`}
+                                >
+                                    <span className="singer-label">Remove</span>
+                                </button>
+                            </div>
                         </div>
-                        <button
-                            className="control-button remove-all"
-                            onClick={() => onRemoveSinger(selectedSinger.id)}
-                            disabled={isDisabled}
-                            title={isDisabled ? "Disabled during elevated melody" : `Remove ${selectedSinger.template.alt}`}
-                        >
-                            <span className="singer-label">Remove</span>
-                        </button>
                     </div>
                 ) : (
                     <div className="no-singer-selected">
-                        Click a cogwork singer to select
+                        <div className="selection-prompt">Click a cogwork singer to select</div>
+                        <div className="keyboard-hint">Use mouse drag or arrow keys to move</div>
                     </div>
                 )}
             </div>

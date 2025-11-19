@@ -9,7 +9,7 @@ interface SingerComponentProps {
     index: number;
     totalInRow: number;
     onSingerSelect: (id: string) => void;
-    onUpdatePosition?: (id: string, xPosition: number) => void;
+    onUpdatePosition?: (id: string, xPosition: number, yOffset?: number) => void;
     isDisabled?: boolean;
 }
 
@@ -25,7 +25,9 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
     const [isDragging, setIsDragging] = useState(false);
     const [isMouseDown, setIsMouseDown] = useState(false);
     const [dragStartX, setDragStartX] = useState(0);
-    const [startPosition, setStartPosition] = useState(0);
+    const [dragStartY, setDragStartY] = useState(0);
+    const [startXPosition, setStartXPosition] = useState(0);
+    const [startYPosition, setStartYPosition] = useState(0);
 
     useEffect(() => {
         if (singer.isSinging) {
@@ -58,21 +60,22 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
 
     // Mouse handlers - distinguish between click and drag
     const handleMouseDown = (e: React.MouseEvent) => {
-        console.log(`🖱️ Mouse down on singer ${singer.id} (${singer.template.alt})`);
 
         if (isDisabled) {
-            console.log(`❌ Singer ${singer.id} is disabled, ignoring interaction`);
             return;
         }
+
+        onSingerSelect(singer.id);
 
         e.preventDefault();
         e.stopPropagation();
 
-        console.log(`🎯 Mouse down for singer ${singer.id} at clientX: ${e.clientX}, current xPosition: ${singer.xPosition || 0}`);
 
         setIsMouseDown(true);
         setDragStartX(e.clientX);
-        setStartPosition(singer.xPosition || 0);
+        setDragStartY(e.clientY);
+        setStartXPosition(singer.xPosition || 0);
+        setStartYPosition(singer.yOffset || 0);
     };
 
     // Use useEffect to handle global mouse events
@@ -83,50 +86,42 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
             return;
         }
 
-        console.log(`🔄 Setting up global mouse listeners for singer ${singer.id}`);
 
         const handleMouseMove = (e: MouseEvent) => {
             const deltaX = Math.abs(e.clientX - dragStartX);
+            const deltaY = Math.abs(e.clientY - dragStartY);
 
-            // Start dragging if mouse moves more than 5 pixels
-            if (deltaX > 5 && !isDragging) {
-                console.log(`🎯 Starting drag for singer ${singer.id} - movement detected: ${deltaX}px`);
+            // Start dragging if mouse moves more than 5 pixels in any direction
+            if ((deltaX > 5 || deltaY > 5) && !isDragging) {
                 setIsDragging(true);
                 document.body.classList.add('dragging');
             }
 
             if (isDragging) {
-                console.log(`↔️ Mouse move - clientX: ${e.clientX}, dragStartX: ${dragStartX}`);
-
                 const actualDeltaX = e.clientX - dragStartX;
-                const newX = startPosition + actualDeltaX;
+                const actualDeltaY = e.clientY - dragStartY;
+
+                const newX = startXPosition + actualDeltaX;
+                const newY = startYPosition + (actualDeltaY * 0.5); // Scale Y movement by 0.5 for finer control
 
                 // Apply absolute limits relative to stage center (0 position)
                 const minX = -350;
                 const maxX = 350;
                 const clampedX = Math.max(minX, Math.min(maxX, newX));
 
-                console.log(`📍 Position calc - startPos: ${startPosition}, deltaX: ${actualDeltaX}, newX: ${newX}, clampedX: ${clampedX} (stage limits: ${minX} to ${maxX})`);
+                // Apply Y limits (-70 to 40 as defined in the move functions)
+                const minY = -70;
+                const maxY = 40;
+                const clampedY = Math.max(minY, Math.min(maxY, newY));
 
                 // Update position immediately for visual feedback
                 if (onUpdatePosition) {
-                    onUpdatePosition(singer.id, clampedX);
+                    onUpdatePosition(singer.id, clampedX, clampedY);
                 }
             }
         };
 
         const handleMouseUp = (e: MouseEvent) => {
-            console.log(`⬆️ Mouse up for singer ${singer.id} at clientX: ${e.clientX}`);
-
-            // If we never started dragging, treat it as a click (selection)
-            if (!isDragging) {
-                console.log(`🎯 Click detected - selecting singer ${singer.id}`);
-                onSingerSelect(singer.id);
-            } else {
-                console.log(`🎯 Drag completed for singer ${singer.id}`);
-                // Also select when dragging completes
-                onSingerSelect(singer.id);
-            }
 
             // Reset all states
             setIsMouseDown(false);
@@ -139,12 +134,11 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
 
         // Cleanup function
         return () => {
-            console.log(`🧹 Cleaning up mouse listeners for singer ${singer.id}`);
             document.body.classList.remove('dragging');
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isMouseDown, isDragging, dragStartX, startPosition, singer.id, singer.isFlipped, onUpdatePosition, onSingerSelect]);
+    }, [isMouseDown, isDragging, dragStartX, dragStartY, startXPosition, startYPosition, singer.id, onUpdatePosition, onSingerSelect]);
 
 
 
@@ -158,13 +152,12 @@ const SingerComponent: React.FC<SingerComponentProps> = ({
         isDisabled ? 'disabled' : ''
     ].filter(Boolean).join(' ');
 
-    console.log(`🎨 Rendering singer ${singer.id} with xPosition: ${singer.xPosition}, classes: ${singerClasses}`);
 
     return (
         <div
             className={`${singerClasses} ${isDragging ? 'dragging' : ''}`}
             onMouseDown={handleMouseDown}
-            title={isDisabled ? 'Disabled during elevated melody' : 'Drag to move position'}
+            title={isDisabled ? 'Disabled during elevated melody' : 'Drag to move position (X and Y axis)'}
             data-position={singer.position}
             style={{
                 '--singer-x-offset': `${singer.xPosition || 0}px`,

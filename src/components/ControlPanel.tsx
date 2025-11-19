@@ -6,6 +6,7 @@ interface ControlPanelProps {
     onPlayElevatedMelody: () => void;
     isAllSinging: boolean;
     isPlayingElevatedMelody: boolean;
+    isExperimentMode: boolean;
     singerCount: number;
 }
 
@@ -30,7 +31,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                             disabled={isPlayingElevatedMelody}
                         />
                         <span className="sing-label-text">
-                            Hear the Architects Melody (loop)
+                            Play Architect's Melody (loop)
                         </span>
                     </label>
 

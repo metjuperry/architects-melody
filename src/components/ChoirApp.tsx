@@ -98,7 +98,8 @@ const decodeSingerConfig = (config: string): Singer[] => {
                 if (coords.length === 3) {
                     const xPosition = (parseInt(coords[0], 36) || 500) - 500;
                     const zIndex = parseInt(coords[1], 36) || 10;
-                    const yOffset = (parseInt(coords[2], 36) || 500) - 500;
+                    const rawYOffset = (parseInt(coords[2], 36) || 500) - 500;
+                    const yOffset = Math.max(-70, Math.min(40, rawYOffset)); // Restrict yOffset between -70px and 40px
 
                     if (templateIndex >= 0 && templateIndex < singerTemplates.length) {
                         const template = singerTemplates[templateIndex];
@@ -125,7 +126,8 @@ const decodeSingerConfig = (config: string): Singer[] => {
                 const isFlipped = elements[2] === '1';
                 const xPosition = parseInt(elements[3]) || 0;
                 const zIndex = parseInt(elements[4]) || 10;
-                const yOffset = parseInt(elements[5]) || 0;
+                const rawYOffset = parseInt(elements[5]) || 0;
+                const yOffset = Math.max(-70, Math.min(40, rawYOffset)); // Restrict yOffset between -70px and 40px
 
                 if (templateIndex >= 0 && templateIndex < singerTemplates.length) {
                     const template = singerTemplates[templateIndex];
@@ -172,6 +174,9 @@ const ChoirApp: React.FC = () => {
     const [singers, setSingers] = useState<Singer[]>([]);
     const [isAllSinging, setIsAllSinging] = useState(false);
     const [isPlayingElevatedMelody, setIsPlayingElevatedMelody] = useState(false);
+    const [isExperimentMode, setIsExperimentMode] = useState(false);
+    const [experimentHeads, setExperimentHeads] = useState<Array<{ id: string, headImg: string, bodyImg: string, x: number, y: number, flipped: boolean, scale?: number }>>([]);
+    const [choirStartTime, setChoirStartTime] = useState<number | undefined>(undefined);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const elevatedMelodyRef = useRef<HTMLAudioElement | null>(null);
     const singerAudioMap = useRef<Map<string, HTMLAudioElement>>(new Map());
@@ -335,9 +340,15 @@ const ChoirApp: React.FC = () => {
         });
     }, []);
 
+    // Helper function to generate full choir background singers
+
+
     const playElevatedMelody = useCallback(() => {
         if (elevatedMelodyRef.current) {
             setIsPlayingElevatedMelody(true);
+
+            // Show the full choir when elevated melody starts and set start time
+            setChoirStartTime(Date.now());
 
             // Stop the regular melody if it's playing
             if (audioRef.current) {
@@ -376,8 +387,7 @@ const ChoirApp: React.FC = () => {
 
             elevatedMelodyRef.current.addEventListener('ended', handleEnded);
         }
-    }, []);
-
+    }, [isExperimentMode]);
 
 
     const flipSinger = useCallback((id: string) => {
@@ -388,12 +398,16 @@ const ChoirApp: React.FC = () => {
         ));
     }, []);
 
-    const updateSingerPosition = useCallback((id: string, xPosition: number) => {
-        console.log(`🎯 ChoirApp: Updating singer ${id} position to ${xPosition}px`);
+    const updateSingerPosition = useCallback((id: string, xPosition: number, yOffset?: number) => {
+        console.log(`🎯 ChoirApp: Updating singer ${id} position to X:${xPosition}px${yOffset !== undefined ? ` Y:${yOffset}px` : ''}`);
         setSingers(prev => {
             const updated = prev.map(singer =>
                 singer.id === id
-                    ? { ...singer, xPosition }
+                    ? {
+                        ...singer,
+                        xPosition,
+                        ...(yOffset !== undefined ? { yOffset: Math.max(-70, Math.min(40, yOffset)) } : {})
+                    }
                     : singer
             );
             console.log(`📊 ChoirApp: Updated singers state`, updated.find(s => s.id === id));
@@ -441,36 +455,58 @@ const ChoirApp: React.FC = () => {
         ));
     }, []);
 
-    const moveUp = useCallback((id: string) => {
-        console.log(`🎯 ChoirApp: Moving singer ${id} up (Y-axis)`);
-        setSingers(prev => prev.map(singer =>
-            singer.id === id
-                ? {
-                    ...singer,
-                    yOffset: (singer.yOffset || 0) - 10 // Move up (negative Y)
-                }
-                : singer
-        ));
-    }, []);
-
-    const moveDown = useCallback((id: string) => {
-        console.log(`🎯 ChoirApp: Moving singer ${id} down (Y-axis)`);
-        setSingers(prev => prev.map(singer =>
-            singer.id === id
-                ? {
-                    ...singer,
-                    yOffset: (singer.yOffset || 0) + 10 // Move down (positive Y)
-                }
-                : singer
-        ));
-    }, []);
-
     const singerCount = singers.length;
+
+    // Keyboard controls for selected singer
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isPlayingElevatedMelody) return; // Disable during elevated melody
+
+            const selectedSinger = singers.find(s => s.isSelected);
+            if (!selectedSinger) return; // No singer selected
+
+            const moveDistance = 5; // Pixels per keypress for finer control
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    updateSingerPosition(selectedSinger.id,
+                        Math.max(-350, (selectedSinger.xPosition || 0) - moveDistance)
+                    );
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    updateSingerPosition(selectedSinger.id,
+                        Math.min(350, (selectedSinger.xPosition || 0) + moveDistance)
+                    );
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    updateSingerPosition(selectedSinger.id,
+                        selectedSinger.xPosition || 0,
+                        Math.max(-70, (selectedSinger.yOffset || 0) - moveDistance)
+                    );
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    updateSingerPosition(selectedSinger.id,
+                        selectedSinger.xPosition || 0,
+                        Math.min(40, (selectedSinger.yOffset || 0) + moveDistance)
+                    );
+                    break;
+                default:
+                    return; // Don't prevent default for other keys
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [singers, isPlayingElevatedMelody, updateSingerPosition]);
 
     return (
         <div className="choir-app" >
             <header className="choir-header">
-                <h1 className="choir-title">Architects Melody Configurator</h1>
+                <h1 className="choir-title">Cogwork Choir Configurator</h1>
                 <p className="choir-subtitle">Configure the statues and listen to the gift of the Architects</p>
             </header>
 
@@ -486,18 +522,16 @@ const ChoirApp: React.FC = () => {
                     onClearSelection={clearSelection}
                     onMoveForward={moveForward}
                     onMoveBack={moveBack}
-                    onMoveUp={moveUp}
-                    onMoveDown={moveDown}
                     onRemoveAll={removeAllSingers}
                 />
 
                 <div className="choir-content">
                     <ControlPanel
-
                         onToggleAllSinging={toggleAllSinging}
                         onPlayElevatedMelody={playElevatedMelody}
                         isAllSinging={isAllSinging}
                         isPlayingElevatedMelody={isPlayingElevatedMelody}
+                        isExperimentMode={isExperimentMode}
                         singerCount={singers.length}
                     />
 
@@ -505,7 +539,10 @@ const ChoirApp: React.FC = () => {
                         singers={singers}
                         onSingerSelect={selectSinger}
                         onUpdatePosition={updateSingerPosition}
+                        onClearSelection={clearSelection}
                         isDisabled={isPlayingElevatedMelody}
+                        singerTemplates={singerTemplates}
+                        choirStartTime={choirStartTime}
                     />
                 </div>
             </div>

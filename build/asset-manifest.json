@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/architects-melody/static/css/main.ad8aa388.css",
-    "main.js": "/architects-melody/static/js/main.c47aadfc.js",
+    "main.css": "/architects-melody/static/css/main.0d1a02e2.css",
+    "main.js": "/architects-melody/static/js/main.143470e1.js",
     "index.html": "/architects-melody/index.html",
-    "main.ad8aa388.css.map": "/architects-melody/static/css/main.ad8aa388.css.map",
-    "main.c47aadfc.js.map": "/architects-melody/static/js/main.c47aadfc.js.map"
+    "main.0d1a02e2.css.map": "/architects-melody/static/css/main.0d1a02e2.css.map",
+    "main.143470e1.js.map": "/architects-melody/static/js/main.143470e1.js.map"
   },
   "entrypoints": [
-    "static/css/main.ad8aa388.css",
-    "static/js/main.c47aadfc.js"
+    "static/css/main.0d1a02e2.css",
+    "static/js/main.143470e1.js"
   ]
 }

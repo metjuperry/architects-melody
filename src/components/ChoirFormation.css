@@ -75,7 +75,7 @@
     object-fit: contain;
     position: relative;
     bottom: -125px;
-
+    pointer-events: none;
 }
 
 .single-formation {
@@ -125,4 +125,51 @@
 .top-right-corner {
     top: -50px;
     right: -20px;
+}
+
+/* Full Choir Mode: Background Singers */
+.experiment-heads {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -10;
+    /* Behind everything else */
+    pointer-events: none;
+}
+
+.experiment-head {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* z-index handled dynamically in JSX */
+}
+
+.experiment-head.flipped {
+    transform: scaleX(-1) translate(50%, -50%);
+}
+
+.experiment-body-container {
+    position: relative;
+    display: inline-block;
+    pointer-events: none;
+}
+
+.experiment-body-image {
+    display: block;
+    height: auto;
+    width: 100%;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.experiment-head-image {
+    position: absolute;
+    height: auto;
+    object-fit: cover;
+    top: 1px;
+    left: 52px;
+    width: auto;
+    pointer-events: none;
 }

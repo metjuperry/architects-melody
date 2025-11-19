@@ -10,6 +10,7 @@
     position: relative;
     overflow-x: hidden;
     overflow-y: hidden;
+    /* Restored to prevent page scrolling */
 }
 
 .App::before {
@@ -46,7 +47,6 @@
     padding: 20px;
     border-radius: 15px;
     margin-bottom: 30px;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 

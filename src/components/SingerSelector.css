@@ -1,22 +1,61 @@
 .singer-selector {
     background: rgba(0, 0, 0, 0.9);
     border-radius: 15px;
-    padding: 20px;
+    padding: 15px;
     width: 300px;
-    max-height: 80vh;
-    overflow-y: hidden;
+    max-height: 95vh;
     overflow-x: hidden;
+    overflow-y: auto;
+    /* Added to allow vertical scrolling in selector */
     border: 1px solid rgba(100, 100, 100, 0.4);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
+/* Custom scrollbar styling for singer selector */
+.singer-selector::-webkit-scrollbar {
+    width: 6px;
+}
+
+.singer-selector::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb {
+    background: rgba(184, 134, 11, 0.5);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb:hover {
+    background: rgba(184, 134, 11, 0.7);
+}
+
+/* Custom scrollbar styling for smaller, more subtle scrollbar */
+.singer-selector::-webkit-scrollbar {
+    width: 6px;
+}
+
+.singer-selector::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb {
+    background: rgba(184, 134, 11, 0.6);
+    border-radius: 3px;
+}
+
+.singer-selector::-webkit-scrollbar-thumb:hover {
+    background: rgba(184, 134, 11, 0.8);
+}
+
 .selector-title {
     color: #b8860b;
     font-family: 'Orbitron', monospace;
-    font-size: 1.2rem;
-    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    margin: 0 0 15px 0;
     text-align: center;
     font-weight: 600;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -25,46 +64,144 @@
 }
 
 .position-section {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .position-title {
     color: #a0a0a0;
     font-family: 'Rajdhani', monospace;
-    font-size: 1.1rem;
-    margin: 0 0 15px 0;
+    font-size: 1rem;
+    margin: 0 0 10px 0;
     text-align: center;
     font-weight: 500;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
 
-.singer-buttons {
+/* Collapsible header styling */
+.position-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.collapse-toggle {
+    background: none;
+    border: 1px solid rgba(184, 134, 11, 0.4);
+    color: rgba(184, 134, 11, 0.8);
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s ease;
+    min-width: auto;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', monospace;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.collapse-toggle:hover {
+    background: rgba(184, 134, 11, 0.1);
+    border-color: rgba(184, 134, 11, 0.6);
+    color: rgba(184, 134, 11, 1);
+}
+
+.collapse-text {
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+/* Collapsible content styling */
+.collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.collapsible-content.expanded {
+    max-height: 500px;
+    /* Large enough for all singer buttons */
+    opacity: 1;
+}
+
+.collapsible-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.singer-buttons-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.singer-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.row-label {
+    color: #b8860b;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.9rem;
+    margin: 0;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    opacity: 0.8;
+}
+
+.singer-row-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
 }
 
 .singer-button {
     background: linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%);
     border: 2px solid rgba(184, 134, 11, 0.6);
-    border-radius: 12px;
-    padding: 12px 8px;
+    border-radius: 8px;
+    padding: 8px 4px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    min-height: 80px;
+    gap: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    position: relative;
 }
 
 .singer-button:hover {
     background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
     border-color: rgba(184, 134, 11, 0.9);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+}
+
+.singer-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 0%, rgba(184, 134, 11, 0.1) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.singer-button:hover::before {
+    opacity: 1;
 }
 
 .singer-button:active {
@@ -100,12 +237,13 @@
 }
 
 .singer-head-button {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     object-fit: cover;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
+    z-index: 1;
 }
 
 .singer-button:hover .singer-head-button {
@@ -116,12 +254,13 @@
 .singer-label {
     color: #ffffff;
     font-family: 'Rajdhani', monospace;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.1;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    z-index: 1;
 }
 
 /* Scrollbar styling */
@@ -145,9 +284,9 @@
 
 /* Singer Controls Section */
 .singer-controls {
-    margin-top: 25px;
+    margin-top: 15px;
     border-top: 2px solid rgba(184, 134, 11, 0.3);
-    padding-top: 20px;
+    padding-top: 12px;
 }
 
 .selected-singer-info {
@@ -155,12 +294,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .selected-singer-head {
-    width: 60px;
-    height: 60px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     border: 2px solid #b8860b;
     box-shadow: 0 2px 8px rgba(184, 134, 11, 0.3);
@@ -225,46 +364,185 @@
 .no-singer-selected {
     color: #666;
     font-family: 'Rajdhani', monospace;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     text-align: center;
     font-style: italic;
-    padding: 15px 10px;
+    padding: 10px 8px;
 }
 
-/* Button grouping styles */
-.button-group {
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(100, 100, 100, 0.2);
+.selection-prompt {
+    margin-bottom: 4px;
 }
 
-.button-group:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+.keyboard-hint {
+    font-size: 0.75rem;
+    color: #888;
 }
 
-.button-group-title {
+/* Movement Instruction */
+.movement-instruction {
+    color: #a0a0a0;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.3;
+    margin: 8px 0;
+    padding: 8px;
+    background: rgba(184, 134, 11, 0.1);
+    border: 1px solid rgba(184, 134, 11, 0.2);
+    border-radius: 6px;
+    font-style: italic;
+}
+
+/* Button Controls */
+.button-controls {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Labels Row */
+.button-labels-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.depth-label-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.actions-label-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.depth-title,
+.actions-title {
     color: #b8860b;
     font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    margin: 0 0 8px 0;
-    text-align: center;
+    font-size: 0.9rem;
     font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-    letter-spacing: 1px;
+    margin: 0;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.button-group .singer-buttons,
-.button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+/* Main Buttons Row */
+.main-buttons-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+/* Remove Button Row */
+.remove-button-row {
+    margin-top: 8px;
+}
+
+.remove-button-wide {
+    width: 100%;
+    background: linear-gradient(135deg, #8b0000 0%, #dc143c 100%);
+    border: 2px solid #dc143c;
+    color: white;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', monospace;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.remove-button-wide:hover:not(:disabled) {
+    background: linear-gradient(135deg, #dc143c 0%, #ff6347 100%);
+    border-color: #ff6347;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 20, 60, 0.4);
+}
+
+.remove-button-wide:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(220, 20, 60, 0.3);
+}
+
+.remove-button-wide:disabled {
+    background: rgba(139, 0, 0, 0.3);
+    border-color: rgba(220, 20, 60, 0.3);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Additional styles for better layout */
+.button-group .singer-buttons {
+    gap: 6px;
     justify-content: center;
 }
 
 .button-group .singer-button {
     flex: 1;
-    min-width: 70px;
+    min-width: 55px;
     font-size: 0.8rem;
+    min-height: 36px !important;
+    height: 36px;
+    padding: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Control Button Styles */
+.control-group {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.control-button {
+    background: linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%);
+    color: #ffffff;
+    border: 2px solid rgba(184, 134, 11, 0.6);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    min-width: 100px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.control-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+    border-color: rgba(184, 134, 11, 0.9);
+    color: #f0f0f0;
+    background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+}
+
+.control-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control-button.remove-all {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    border-color: rgba(245, 101, 101, 0.6);
+}
+
+.control-button.remove-all:hover:not(:disabled) {
+    border-color: rgba(245, 101, 101, 0.9);
+    background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
 }
