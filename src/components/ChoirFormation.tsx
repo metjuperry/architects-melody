@@ -68,7 +68,7 @@ const ChoirFormation: React.FC<ChoirFormationProps> = ({
             {singers.length === 0 ? (
                 <div className="choir-placeholder">
                     <div className="placeholder-content">
-                        <div className="placeholder-title">The workshop stands silent...</div>
+                        <div className="placeholder-title">Add a singer</div>
                         <div className="placeholder-subtitle">
                             Select cogwork statues to hear the Architects Melody!
                         </div>

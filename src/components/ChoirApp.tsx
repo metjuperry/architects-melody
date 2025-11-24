@@ -399,7 +399,6 @@ const ChoirApp: React.FC = () => {
     }, []);
 
     const updateSingerPosition = useCallback((id: string, xPosition: number, yOffset?: number) => {
-        console.log(`🎯 ChoirApp: Updating singer ${id} position to X:${xPosition}px${yOffset !== undefined ? ` Y:${yOffset}px` : ''}`);
         setSingers(prev => {
             const updated = prev.map(singer =>
                 singer.id === id
@@ -410,13 +409,11 @@ const ChoirApp: React.FC = () => {
                     }
                     : singer
             );
-            console.log(`📊 ChoirApp: Updated singers state`, updated.find(s => s.id === id));
             return updated;
         });
     }, []);
 
     const selectSinger = useCallback((id: string) => {
-        console.log(`🎯 ChoirApp: Selecting singer ${id}`);
         setSingers(prev => prev.map(singer => ({
             ...singer,
             isSelected: singer.id === id
@@ -424,7 +421,6 @@ const ChoirApp: React.FC = () => {
     }, []);
 
     const clearSelection = useCallback(() => {
-        console.log(`🎯 ChoirApp: Clearing selection`);
         setSingers(prev => prev.map(singer => ({
             ...singer,
             isSelected: false
@@ -432,7 +428,6 @@ const ChoirApp: React.FC = () => {
     }, []);
 
     const moveForward = useCallback((id: string) => {
-        console.log(`🎯 ChoirApp: Moving singer ${id} forward (Z-axis)`);
         setSingers(prev => prev.map(singer =>
             singer.id === id
                 ? {
@@ -444,7 +439,6 @@ const ChoirApp: React.FC = () => {
     }, []);
 
     const moveBack = useCallback((id: string) => {
-        console.log(`🎯 ChoirApp: Moving singer ${id} back (Z-axis)`);
         setSingers(prev => prev.map(singer =>
             singer.id === id
                 ? {
